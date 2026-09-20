@@ -179,11 +179,6 @@ export const LearningSessionView: React.FC = () => {
             <h2 className="text-lg sm:text-xl font-bold text-on-surface">
               {currentQuestion.prompt}
             </h2>
-            {currentQuestion.promptKorean && (
-              <p className="text-sm text-secondary font-medium">
-                {currentQuestion.promptKorean}
-              </p>
-            )}
           </div>
 
           {/* Target Sentence Card */}
@@ -224,6 +219,13 @@ export const LearningSessionView: React.FC = () => {
                 </button>
               </div>
             </div>
+
+            {(currentQuestion.type === 'fill_blank' || currentQuestion.type === 'word_order') &&
+              currentQuestion.promptKorean && (
+                <p className="text-sm text-secondary font-medium">
+                  {currentQuestion.promptKorean}
+                </p>
+              )}
           </div>
 
           {/* Interactive Question Type Renderers (Section 7.2) */}

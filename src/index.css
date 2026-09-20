@@ -99,30 +99,10 @@
 
 .wordscene-entry__frame {
   position: relative;
-  width: min(100vw, 56.25rem);
-  aspect-ratio: 894 / 1600;
+  width: min(100vw, 28rem);
   max-height: 100dvh;
-  filter: drop-shadow(0 24px 60px rgba(117, 43, 97, .2));
-}
-
-.wordscene-entry__art { display: block; width: 100%; height: 100%; object-fit: contain; }
-.wordscene-entry__start,
-.wordscene-entry__login {
-  position: absolute;
-  left: 9.2%;
-  width: 81.6%;
-  border: 0;
-  border-radius: 999px;
-  background: transparent;
-  cursor: pointer;
-}
-.wordscene-entry__start { top: 87.25%; height: 7.1%; }
-.wordscene-entry__login { top: 95.2%; height: 3.4%; }
-.wordscene-entry__start:focus-visible,
-.wordscene-entry__login:focus-visible { outline: 4px solid #24005b; outline-offset: 4px; }
-
-@media (min-width: 900px) {
-  .wordscene-entry__frame { width: min(56.25rem, 56.25vh); }
+  padding: 2.5rem 1.5rem 2rem;
+  box-sizing: border-box;
 }
 
 @media (prefers-reduced-motion: reduce) {
