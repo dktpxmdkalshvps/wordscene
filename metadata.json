@@ -1,0 +1,6 @@
+{
+  "name": "WordScene",
+  "description": "반짝이는 나의 영어 여정 - 원서 문학 명작과 미디어로 배우는 몰입형 영어 학습 웹 앱",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
