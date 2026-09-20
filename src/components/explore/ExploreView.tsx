@@ -4,8 +4,9 @@ import { Work, Difficulty, MediaCategory } from '../../types';
 import { getPreviewSentence } from '../../lib/contentService';
 
 export const ExploreView: React.FC = () => {
-  const { works, questionsByWork, startWorkLesson, showToast } = useApp();
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const { works, questionsByWork, startWorkLesson, showToast, exploreCategory, setExploreCategory } = useApp();
+  const selectedCategory = exploreCategory;
+  const setSelectedCategory = setExploreCategory;
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeModalWork, setActiveModalWork] = useState<Work | null>(null);

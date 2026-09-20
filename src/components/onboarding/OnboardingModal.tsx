@@ -30,7 +30,7 @@ const featureDetails: Record<string, { label: string; items: string[] }> = {
 };
 
 export const OnboardingModal: React.FC = () => {
-  const { showOnboarding, setShowOnboarding, setActiveTab, showToast, updateUserProfile } = useApp();
+  const { showOnboarding, setShowOnboarding, setActiveTab, showToast, updateUserProfile, works } = useApp();
   const [onboardingPage, setOnboardingPage] = useState<'landing' | 'goal'>('landing');
   const [goal, setGoal] = useState('시험 & 스펙 완성');
   const [level, setLevel] = useState('초급 (A2)');
@@ -158,7 +158,27 @@ export const OnboardingModal: React.FC = () => {
         <section id="library" className="ws-library-section">
           <div className="ws-library-heading"><div><span>CURATED MASTERPIECES</span><h2>지금 만날 수 있는 원서</h2></div><button type="button" onClick={() => enterApp('explore', '명작 도서관을 둘러보세요.')}>명작 도서관 전체보기 →</button></div>
           <div className="ws-book-grid">
-            {books.map(([title, ko, author, color], index) => <article className={`ws-book ws-book--${color}`} key={title}><div className="ws-book__cover"><span>COLLECTION 0{index + 1}</span><strong>{title}</strong><i>WordScene Classics</i></div><h3>{ko}</h3><p>{title} · {author}</p><small>★ 학습 문장 3개</small></article>)}
+            {books.map(([title, ko, author, color], index) => {
+              const matchedWork = works.find(w =>
+                w.title.toLowerCase().includes(title.toLowerCase()) ||
+                w.koreanTitle.includes(ko) ||
+                w.id.toLowerCase().includes(title.toLowerCase().split(' ')[0])
+              );
+              const sentenceCount = matchedWork ? matchedWork.totalSentences : 10;
+
+              return (
+                <article className={`ws-book ws-book--${color}`} key={title}>
+                  <div className="ws-book__cover">
+                    <span>COLLECTION 0{index + 1}</span>
+                    <strong>{title}</strong>
+                    <i>WordScene Classics</i>
+                  </div>
+                  <h3>{ko}</h3>
+                  <p>{title} · {author}</p>
+                  <small>★ 학습 문장 {sentenceCount}개</small>
+                </article>
+              );
+            })}
           </div>
         </section>
 
