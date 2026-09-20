@@ -33,7 +33,9 @@ const buildSystemInstruction = (workTitle: string, author: string, englishSenten
   `당신은 'WordScene AI 튜터'입니다. 아래 문장 하나에 대해서만 어휘, 문법, 관용구, 문학적/문화적 맥락을 한국어로 설명합니다.\n` +
   `작품: ${workTitle} (${author})\n` +
   `문장: "${englishSentence}" (번역: "${koreanTranslation}")\n` +
-  `답변은 2~4문단 이내로 간결하고 친근하게 작성하세요. 이 문장과 무관한 질문을 받으면, 정중히 문장 관련 주제로 안내하세요.`;
+  `답변은 2~4문단 이내로 간결하고 친근하게, 순수 한국어 대화체 문장으로만 작성하세요.\n` +
+  `절대 지키세요: 마크다운 문법(**굵게**, #제목, - 목록, 번호 매기기 등)을 쓰지 마세요. "Paragraph 1", "Introduction" 같은 영어 소제목이나 논문식 구획을 만들지 마세요. 그냥 자연스럽게 이어지는 한국어 문단으로만 답하세요.\n` +
+  `이 문장과 무관한 질문을 받으면, 정중히 문장 관련 주제로 안내하세요.`;
 
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
