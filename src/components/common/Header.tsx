@@ -73,7 +73,7 @@ export const Header: React.FC = () => {
             title="내 프로필"
           >
             <img
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDTJsvbOw3slgKmURAAFJ1tcP7aycW29UHNU9KeDSGICxNBSC6Y1IJm_WNb9pYmEQaTGkvs7m7_uhgjj8btipfXOOj80E6nX6-qC7ffVCwAQyzUBJj2ebjCgiF35H333gXlAfom4qLL5X0_w-VjbPCeujndboagTpr_4wkK9rFi-avrNkfjLZGSUdAQMmFOy1xOThTJaT1_PgrvgP__0Yel3GXUGyeReOYE72WagxJRtKeFyk9egbKpDg"
+              src="https://i.imgur.com/UBBX4MK.jpeg"
               alt="프로필 사진"
               className="w-8 h-8 rounded-full object-cover ring-2 ring-primary-container/80 shadow-sm group-hover:scale-105 transition-transform"
             />
