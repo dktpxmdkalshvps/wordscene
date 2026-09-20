@@ -487,7 +487,7 @@ export const HomeView: React.FC = () => {
               </div>
             </div>
 
-            {/* Path Node 2: Alice in Wonderland (Ready Challenge) */}
+            {/* Path Node 2: Pride and Prejudice (Ready Challenge) */}
             <div className="relative flex items-start gap-4">
               <div className="relative z-10 w-12 h-12 rounded-full bg-surface-container-highest flex items-center justify-center text-secondary shadow-sm ring-4 ring-surface shrink-0">
                 <span className="material-symbols-outlined text-2xl">lock_open</span>
@@ -509,8 +509,8 @@ export const HomeView: React.FC = () => {
                     </span>
                   </div>
                 </div>
-                <h4 className="text-base font-bold text-on-surface">Alice in Wonderland</h4>
-                <p className="text-xs text-on-surface-variant mt-0.5">신비한 원더랜드 대화문 마스터</p>
+                <h4 className="text-base font-bold text-on-surface">Pride and Prejudice</h4>
+                <p className="text-xs text-on-surface-variant mt-0.5">오만과 편견 명대사 및 문장 학습</p>
                 <button
                   onClick={() => {
                     const sherlock = works.find(w => /sherlock/i.test(w.title)) ?? works[1];
@@ -594,18 +594,18 @@ export const HomeView: React.FC = () => {
                 setExploreCategory('cinema');
                 setActiveTab('explore');
               }}
-              className="rounded-2xl p-4 bg-gradient-to-r from-surface-container-lowest to-surface-container-low border border-white/60 shadow-xs flex items-center gap-4 cursor-pointer hover:shadow-md transition-shadow"
+              className="rounded-2xl p-4 bg-gradient-to-r from-surface-container-lowest to-surface-container-low border border-white/60 shadow-xs flex items-center gap-3 cursor-pointer hover:shadow-md transition-shadow"
             >
-              <div className="w-16 h-20 rounded-xl bg-secondary-fixed/50 shrink-0 flex flex-col items-center justify-center text-secondary shadow-inner">
+              <div className="w-14 h-20 rounded-xl bg-secondary-fixed/50 shrink-0 flex flex-col items-center justify-center text-secondary shadow-inner">
                 <span className="material-symbols-outlined text-[28px]">theaters</span>
                 <span className="text-[10px] font-bold mt-1">CINEMA</span>
               </div>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="px-2 py-0.5 rounded-full bg-secondary text-on-secondary text-[11px] font-bold">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="px-2 py-0.5 rounded-full bg-secondary text-on-secondary text-[11px] font-bold whitespace-nowrap">
                     서비스 중
                   </span>
-                  <span className="text-[11px] text-secondary font-bold">{cinemaCount}편 라이브</span>
+                  <span className="text-[11px] text-secondary font-bold whitespace-nowrap">{cinemaCount}편 라이브</span>
                 </div>
                 <h4 className="text-sm font-bold text-on-surface mt-1 truncate">한국 영화 명대사</h4>
                 <p className="text-xs text-on-surface-variant line-clamp-1 mt-0.5">
@@ -615,40 +615,44 @@ export const HomeView: React.FC = () => {
             </div>
 
             {/* Media Card 3: 헐리우드 영화 명대사 (서브 컬렉션 - 12월 공개 예정) */}
-            <div className="rounded-2xl p-4 bg-surface-container-lowest/90 backdrop-blur-xl border border-white/60 shadow-xs flex items-center gap-4 relative overflow-hidden">
-              <div className="w-16 h-20 rounded-xl bg-surface-container-high shrink-0 flex flex-col items-center justify-center text-on-surface-variant shadow-inner">
-                <span className="material-symbols-outlined text-[28px]">movie</span>
-                <span className="text-[10px] font-bold mt-1">HOLLYWOOD</span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className="px-2 py-0.5 rounded-full bg-surface-container-highest text-on-surface-variant text-[11px] font-bold">
-                    준비 중
-                  </span>
-                  <span className="text-[11px] text-primary font-bold">12월 공개 예정</span>
+            <div className="rounded-2xl p-4 bg-surface-container-lowest/90 backdrop-blur-xl border border-white/60 shadow-xs flex flex-col justify-between gap-3 relative overflow-hidden">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-14 h-20 rounded-xl bg-surface-container-high shrink-0 flex flex-col items-center justify-center text-on-surface-variant shadow-inner">
+                  <span className="material-symbols-outlined text-[28px]">movie</span>
+                  <span className="text-[10px] font-bold mt-1">HOLLYWOOD</span>
                 </div>
-                <h4 className="text-sm font-bold text-on-surface mt-1 truncate">헐리우드 영화 명대사</h4>
-                <p className="text-xs text-on-surface-variant line-clamp-1 mt-0.5">
-                  현지 위트와 생생한 구어체 표현집
-                </p>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="px-2 py-0.5 rounded-full bg-surface-container-highest text-on-surface-variant text-[11px] font-bold whitespace-nowrap">
+                      준비 중
+                    </span>
+                    <span className="text-[11px] text-primary font-bold whitespace-nowrap">12월 공개 예정</span>
+                  </div>
+                  <h4 className="text-sm font-bold text-on-surface mt-1 truncate">헐리우드 영화 명대사</h4>
+                  <p className="text-xs text-on-surface-variant line-clamp-1 mt-0.5">
+                    현지 위트와 생생한 구어체 표현집
+                  </p>
+                </div>
               </div>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setCinemaAlerted(!cinemaAlerted);
-                  showToast(cinemaAlerted ? '알림 예약을 취소했습니다.' : '헐리우드 영화 명대사 오픈 알림이 예약되었습니다! 🔔');
-                }}
-                className={`min-h-[36px] px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 transition-all shrink-0 cursor-pointer ${
-                  cinemaAlerted
-                    ? 'bg-secondary text-on-secondary shadow-xs'
-                    : 'bg-surface-container-high text-on-surface hover:bg-secondary-fixed'
-                }`}
-              >
-                <span className="material-symbols-outlined text-xs">
-                  {cinemaAlerted ? 'check' : 'notifications'}
-                </span>
-                <span>{cinemaAlerted ? '예약됨' : '알림 받기'}</span>
-              </button>
+              <div className="flex justify-end pt-1 border-t border-surface-container-high/50">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCinemaAlerted(!cinemaAlerted);
+                    showToast(cinemaAlerted ? '알림 예약을 취소했습니다.' : '헐리우드 영화 명대사 오픈 알림이 예약되었습니다! 🔔');
+                  }}
+                  className={`min-h-[32px] px-3 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 transition-all shrink-0 cursor-pointer ${
+                    cinemaAlerted
+                      ? 'bg-secondary text-on-secondary shadow-xs'
+                      : 'bg-surface-container-high text-on-surface hover:bg-secondary-fixed'
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-xs">
+                    {cinemaAlerted ? 'check' : 'notifications'}
+                  </span>
+                  <span className="whitespace-nowrap">{cinemaAlerted ? '예약됨' : '알림 받기'}</span>
+                </button>
+              </div>
             </div>
           </div>
         </section>

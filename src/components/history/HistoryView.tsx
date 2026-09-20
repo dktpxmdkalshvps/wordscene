@@ -15,7 +15,7 @@ export const HistoryView: React.FC = () => {
     },
     {
       date: '2026-09-17 (어제)',
-      workTitle: 'Alice in Wonderland (챕터 1)',
+      workTitle: 'Pride and Prejudice (챕터 1)',
       accuracy: 90,
       xp: 75,
       count: 10,

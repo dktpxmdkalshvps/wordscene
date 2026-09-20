@@ -304,7 +304,7 @@ export const HAPPY_PRINCE_QUESTIONS: Question[] = [
     sentence: '“Dear Little Swallow, you tell me of marvellous things, but more marvellous than anything is the suffering of men and women.”',
     options: [
       'The Happy Prince (오스카 와일드)',
-      'Alice in Wonderland (루이스 캐럴)',
+      'Pride and Prejudice (제인 오스틴)',
       'The Little Prince (생텍쥐페리)',
       'Peter Pan (J.M. 배리)'
     ],
@@ -331,7 +331,7 @@ export const RANDOM_SPEED_QUESTIONS: Question[] = [
     options: ['Curiouser', 'Happier', 'Quicker', 'Louder'],
     correctAnswer: 'Curiouser',
     explanation: '루이스 캐럴이 만든 유명한 신조어 curiouser(더 신기하고 이상한)입니다.',
-    workTitle: 'Alice in Wonderland',
+    workTitle: 'Pride and Prejudice',
     author: '루이스 캐럴',
     vocabularies: [{ word: 'curious', meaning: '궁금한, 기묘한' }]
   },

@@ -66,7 +66,7 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 const FRESH_PROFILE: UserProfile = {
-  name: '학습자',
+  name: '은별',
   level: 1,
   levelTitle: 'Lv.1 첫 문장',
   totalXp: 0,
