@@ -69,7 +69,7 @@ export const OnboardingModal: React.FC = () => {
           <div className="ws-goal-canvas">
             <section className="ws-lumi-stage">
               <div className="ws-lumi-stage__head"><span>✨ 3D 시각 몰입 학습</span><b>● Lumi와 함께 탐험</b></div>
-              <div className="ws-lumi-image"><img src="/wordscene-entry.png" alt="루미 공식 마스코트" /><div><span className="material-symbols-outlined">menu_book</span><p><b>반짝이는 나의 영어 여정</b><small>생생한 장면 속에서 피어나는 언어 감각</small></p></div></div>
+              <div className="ws-lumi-image"><img src="https://i.imgur.com/R7w7qhM.png" alt="루미 공식 마스코트" /><div><span className="material-symbols-outlined">menu_book</span><p><b>반짝이는 나의 영어 여정</b><small>생생한 장면 속에서 피어나는 언어 감각</small></p></div></div>
               <div className="ws-lumi-stats"><p><b>111개</b><span>엄선된 원서·영화 명문장</span></p><p><b>14편</b><span>고전 원서 + 영화</span></p><p><b>10분</b><span>권장 일일 학습</span></p></div>
             </section>
             <section className="ws-goal-panel">
@@ -123,7 +123,7 @@ export const OnboardingModal: React.FC = () => {
 
           <div className="ws-product-card" aria-label="WordScene 학습 화면 미리보기">
             <div className="ws-product-card__bar"><div><i /><i /><i /></div><span>✨ Today · 5 min</span></div>
-            <div className="ws-product-card__visual"><img src="/wordscene-entry.png" alt="루미와 반짝이는 WordScene 학습 화면" /><span>📖 공개 판본 원문 그대로 학습</span></div>
+            <div className="ws-product-card__visual"><img src="https://i.imgur.com/R7w7qhM.png" alt="루미와 반짝이는 WordScene 학습 화면" /><span>📖 공개 판본 원문 그대로 학습</span></div>
             <div className="ws-product-steps">
               <div><b>🎯</b><span><strong>Step 1 · 관심 분야 선택하기</strong><small>행복한 왕자 · 셜록 홈즈의 모험</small></span><i>✓</i></div>
               <div className="active"><b>🧠</b><span><strong>Step 2 · 1분 실력 진단</strong><small className="ws-mini-progress"><i /></small></span><i>진행중</i></div>
