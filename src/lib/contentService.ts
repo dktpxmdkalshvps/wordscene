@@ -22,6 +22,18 @@ type DbMovieQuote = {
   notes: string | null;
 };
 
+type DbGeneratedQuestion = {
+  source_table: 'book_contents' | 'movie_quotes_ko_en';
+  source_id: string;
+  question_type: string;
+  prompt: string;
+  prompt_korean: string | null;
+  sentence: string;
+  options: string[];
+  correct_answer: string | string[];
+  explanation: string;
+};
+
 export type ContentCatalog = {
   works: Work[];
   questionsByWork: Record<string, Question[]>;
@@ -29,6 +41,34 @@ export type ContentCatalog = {
 };
 
 const STOPWORDS = new Set(['about', 'after', 'again', 'before', 'could', 'every', 'their', 'there', 'these', 'those', 'would']);
+
+const BOOK_KOREAN_TITLES: Record<string, string> = {
+  BOOK_HP_1888: '행복한 왕자',
+  BOOK_SH_1892: '셜록 홈즈의 모험',
+  BOOK_GG_1925: '위대한 개츠비',
+  BOOK_PP_1813: '오만과 편견',
+  BOOK_FR_1818: '프랑켄슈타인',
+};
+
+const BOOK_COVERS: Record<string, string> = {
+  BOOK_HP_1888: 'https://img.hankyung.com/photo/200804/2008041725411_2008041877881.jpg',
+  BOOK_SH_1892: 'https://m.media-amazon.com/images/I/71XFTiuB1-L.jpg',
+  BOOK_GG_1925: 'https://contents.kyobobook.co.kr/sih/fit-in/400x0/pdt/9780743273565.jpg?t=2982968',
+  BOOK_PP_1813: 'https://fcs-img.s3.amazonaws.com/1ebda62b-7f02-4fab-8e39-a5e6016ae6b4/9ab485cd-23e6-434f-8139-b1be014aa45d/XL.jpg',
+  BOOK_FR_1818: 'https://contents.kyobobook.co.kr/sih/fit-in/400x0/pdt/9780451532244.jpg?t=2979022',
+};
+
+const MOVIE_COVERS: Record<string, string> = {
+  건축학개론: 'https://flexible.img.hani.co.kr/flexible/normal/900/600/imgdb/original/2023/1027/20231027502448.jpg',
+  극한직업: 'https://sm.ign.com/ign_kr/screenshot/default/1_b4g2.jpg',
+  '남산의 부장들': 'https://i.ytimg.com/vi/BIKz5KQpiog/sddefault.jpg',
+  베테랑: 'https://pds.joongang.co.kr/news/component/htmlphoto_mmdata/201508/29/htm_20150829091350949.jpg',
+  부당거래: 'https://i.namu.wiki/i/rf4P7RGqafHygOtysazAWKQzcA7YHU2faRr2iQc_7-IH8wjfOolRXgi-MGRANDK69_nH0sIOYxmVUl4cCmaj8A.webp',
+  아저씨: 'https://img.hankyung.com/photo/202112/01.28216191.1.jpg',
+  올드보이: 'https://i.namu.wiki/i/-NRuOEma3DmirkkSyK1bdSY94gm1CpT8UJbh7XRlBH7N2KB2wsDcFsLbO4FNzugZA91gufpIzAKxX0MUNSuTvg.webp',
+  '친절한 금자씨': 'https://i.namu.wiki/i/sYQ1SZGDVhLM3cwl5Ann-6biY6a95O-66jxXDMI-wpqx4PUbZotrZQjz9gHDm3PyP6ADru8XfbkcBsdgn4Qjqw.webp',
+  타짜: 'https://i.namu.wiki/i/-oIsPiB0O_KNfRKpD5NyltnQWUZfShe2X43cdDQ4U9YDOCBbR_k7LbYxDz5L_7KrVfdtt8xHhRAg21-8ofcReQ.webp',
+};
 
 const FILL_BLANK_DISTRACTOR_POOL = ['remember', 'different', 'beautiful', 'through', 'silence', 'forever', 'possible', 'necessary'];
 
@@ -210,7 +250,7 @@ const buildMovieWorks = (
       totalSentences: movieQuotes.length,
       completedSentences: 0,
       description: `${movieQuotes.length}개의 명대사로 배우는 실전 회화 표현`,
-      coverImage: coverPool[index % coverPool.length],
+      coverImage: MOVIE_COVERS[movieTitle] ?? coverPool[index % coverPool.length],
       badge: index === 0 ? '영화 명대사' : '학습 가능',
       isLocked: false,
       stageNumber: stageOffset + index + 1,
@@ -252,14 +292,14 @@ export const loadContentCatalog = async (): Promise<ContentCatalog> => {
       return {
         id: work.id,
         title: work.title,
-        koreanTitle: work.title,
+        koreanTitle: BOOK_KOREAN_TITLES[work.id] ?? work.title,
         author: work.author,
         category: 'books',
         difficulty: difficultyOf(cards[0]?.difficulty ?? 'Beginner'),
         totalSentences: cards.length,
         completedSentences: 0,
         description: cards[0]?.learning_focus?.join(' · ') || '명작 원문으로 문맥과 표현을 함께 익혀보세요.',
-        coverImage: fallbackCovers[index % fallbackCovers.length],
+        coverImage: BOOK_COVERS[work.id] ?? fallbackCovers[index % fallbackCovers.length],
         badge: index === 0 ? '오늘의 추천' : '학습 가능',
         isLocked: false,
         stageNumber: work.sort_order,
@@ -285,8 +325,72 @@ export const loadContentCatalog = async (): Promise<ContentCatalog> => {
       // movies unavailable — books-only catalog is still returned below
     }
 
+    // Admin-approved AI-generated questions are an optional quality upgrade
+    // over the deterministic ones above. A failure here must not affect the
+    // (already working) catalog — every entry just keeps its deterministic
+    // question, exactly the fallback behavior this feature is designed around.
+    try {
+      const generated = await request<DbGeneratedQuestion[]>(
+        'generated_questions?select=source_table,source_id,question_type,prompt,prompt_korean,sentence,options,correct_answer,explanation&review_status=eq.selected'
+      );
+      if (generated.length) {
+        const bySentenceIdAndType = new Map<string, DbGeneratedQuestion>();
+        generated.forEach(g => {
+          const sentenceId = g.source_table === 'movie_quotes_ko_en' ? `movie-${g.source_id}` : g.source_id;
+          bySentenceIdAndType.set(`${sentenceId}::${g.question_type}`, g);
+        });
+        for (const workId of Object.keys(questionsByWork)) {
+          questionsByWork[workId] = questionsByWork[workId].map(q => {
+            const match = bySentenceIdAndType.get(`${q.sentenceId}::${q.type}`);
+            if (!match) return q;
+            return {
+              ...q,
+              prompt: match.prompt,
+              promptKorean: match.prompt_korean ?? undefined,
+              sentence: match.sentence,
+              options: match.options,
+              correctAnswer: match.correct_answer,
+              explanation: match.explanation,
+            };
+          });
+        }
+      }
+    } catch {
+      // AI-enhanced questions unavailable — deterministic questions stand as-is
+    }
+
     return { works, questionsByWork, source: 'supabase' };
   } catch {
     return localCatalog();
   }
+};
+
+// Reconstructs a clean (unblanked, unscrambled) English/Korean sentence pair
+// from any Question, regardless of its quiz type — used wherever the app
+// wants to show a plain preview of a work's content rather than a live quiz.
+// Dialogue sentences often already carry their own quote marks in the source
+// text — strip a single matching outer pair so callers can safely wrap the
+// result in “…” without ever producing a doubled-up "“"the words"”" look.
+const stripOuterQuotes = (text: string) => text.trim().replace(/^["“”]+/, '').replace(/["“”]+$/, '');
+
+export const getPreviewSentence = (
+  questionsByWork: Record<string, Question[]>,
+  workId: string
+): { english: string; korean: string } | null => {
+  const question = questionsByWork[workId]?.[0];
+  if (!question) return null;
+
+  if (question.type === 'fill_blank' && typeof question.correctAnswer === 'string') {
+    return {
+      english: stripOuterQuotes(question.sentence.replace('_____', question.correctAnswer)),
+      korean: stripOuterQuotes(question.promptKorean ?? ''),
+    };
+  }
+  if (question.type === 'translation_match') {
+    return {
+      english: stripOuterQuotes(question.sentence),
+      korean: stripOuterQuotes(typeof question.correctAnswer === 'string' ? question.correctAnswer : ''),
+    };
+  }
+  return { english: stripOuterQuotes(question.sentence), korean: stripOuterQuotes(question.promptKorean ?? '') };
 };

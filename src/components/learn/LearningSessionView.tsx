@@ -30,16 +30,12 @@ export const LearningSessionView: React.FC = () => {
   const isLastQuestion = currentQIndex >= activeSession.questions.length - 1;
   const progressPercent = Math.round(((currentQIndex) / activeSession.questions.length) * 100);
 
-  // Auto-speak on question load if sound enabled
+  // Reset per-question state on question change (playback is manual-only, via the TTS button)
   useEffect(() => {
     setSelectedAnswer('');
     setArrangedWords([]);
     setIsAnswerChecked(false);
     setIsCorrect(false);
-
-    if (user.soundEnabled && currentQuestion.type !== 'word_order') {
-      speakEnglishText(currentQuestion.sentence, user.speechRate);
-    }
   }, [currentQIndex]);
 
   // Handle TTS
@@ -78,11 +74,6 @@ export const LearningSessionView: React.FC = () => {
 
     setIsCorrect(correct);
     setIsAnswerChecked(true);
-
-    // Play feedback tone / pronunciation
-    if (user.soundEnabled) {
-      speakEnglishText(currentQuestion.sentence, user.speechRate);
-    }
   };
 
   // Word order helper: add word

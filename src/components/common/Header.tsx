@@ -19,11 +19,11 @@ export const Header: React.FC = () => {
             <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary-container via-secondary-container to-tertiary-container flex items-center justify-center shadow-[0_2px_8px_rgba(103,232,249,0.5)]">
               <span className="material-symbols-outlined text-on-surface text-[18px]">auto_awesome</span>
             </div>
-            <span className="font-extrabold text-[17px] text-on-surface tracking-tight">WordScene</span>
+            <span className="hidden min-[400px]:inline font-extrabold text-[17px] text-on-surface tracking-tight">WordScene</span>
           </div>
 
           {/* Language badge */}
-          <div className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-surface-container-lowest/90 backdrop-blur-md shadow-xs border border-white/50 text-xs font-semibold text-on-surface">
+          <div className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-surface-container-lowest/90 backdrop-blur-md shadow-xs border border-white/50 text-[11px] min-[360px]:text-xs lg:text-sm font-semibold text-on-surface whitespace-nowrap shrink-0">
             <span>{user.selectedLanguage}</span>
           </div>
         </div>
@@ -33,21 +33,27 @@ export const Header: React.FC = () => {
           {/* Streak pill */}
           <button
             onClick={() => setActiveTab('history')}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-lowest/90 backdrop-blur-md shadow-xs border border-secondary-fixed/50 hover:bg-secondary-fixed/20 transition-all cursor-pointer"
+            className="flex items-center gap-1 min-[360px]:gap-1.5 px-2.5 min-[360px]:px-3 py-1.5 rounded-full bg-surface-container-lowest/90 backdrop-blur-md shadow-xs border border-secondary-fixed/50 hover:bg-secondary-fixed/20 transition-all cursor-pointer whitespace-nowrap shrink-0"
             title="연속 학습 기록 보기"
           >
             <span className="text-sm">🔥</span>
-            <span className="text-xs font-bold text-secondary">{user.streakDays}일 연속</span>
+            <span className="text-[11px] min-[360px]:text-xs lg:text-sm font-bold text-secondary">
+              <span className="hidden min-[360px]:inline">{user.streakDays}일 연속</span>
+              <span className="min-[360px]:hidden">{user.streakDays}일</span>
+            </span>
           </button>
 
           {/* XP pill */}
           <button
             onClick={() => setActiveTab('profile')}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-lowest/90 backdrop-blur-md shadow-xs border border-primary-fixed/50 hover:bg-primary-container/20 transition-all cursor-pointer"
+            className="flex items-center gap-1 min-[360px]:gap-1.5 px-2.5 min-[360px]:px-3 py-1.5 rounded-full bg-surface-container-lowest/90 backdrop-blur-md shadow-xs border border-primary-fixed/50 hover:bg-primary-container/20 transition-all cursor-pointer whitespace-nowrap shrink-0"
             title="경험치 및 레벨 보기"
           >
             <span className="text-sm">✨</span>
-            <span className="text-xs font-bold text-primary">{user.totalXp} XP</span>
+            <span className="text-[11px] min-[360px]:text-xs lg:text-sm font-bold text-primary">
+              <span className="hidden min-[360px]:inline">{user.totalXp} XP</span>
+              <span className="min-[360px]:hidden">{user.totalXp}XP</span>
+            </span>
           </button>
 
           {/* Notification icon */}

@@ -2,10 +2,23 @@ import React, { useEffect, useState } from 'react';
 import {
   fetchPendingBookContents,
   fetchPendingMovieQuotes,
+  fetchApprovedSentences,
+  fetchPendingGeneratedQuestions,
+  generateQuestion,
   submitReview,
   PendingBookContent,
   PendingMovieQuote,
+  ApprovedSentence,
+  PendingGeneratedQuestion,
+  GeneratedQuestionType,
+  ReviewTable,
 } from '../../lib/adminReview';
+
+const QUESTION_TYPE_LABELS: Record<GeneratedQuestionType, string> = {
+  fill_blank: '빈칸 채우기',
+  word_order: '어순 배열',
+  translation_match: '번역 매칭',
+};
 
 const PASSCODE_KEY = 'ws_admin_passcode';
 
@@ -18,18 +31,30 @@ export const AdminReviewPanel: React.FC<AdminReviewPanelProps> = ({ onClose }) =
   const [passcodeInput, setPasscodeInput] = useState(passcode);
   const [books, setBooks] = useState<PendingBookContent[]>([]);
   const [movies, setMovies] = useState<PendingMovieQuote[]>([]);
+  const [approvedSentences, setApprovedSentences] = useState<ApprovedSentence[]>([]);
+  const [generatedQuestions, setGeneratedQuestions] = useState<PendingGeneratedQuestion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const [generatingKey, setGeneratingKey] = useState<string | null>(null);
 
   const loadPending = () => {
     setIsLoading(true);
     setLoadError(null);
-    Promise.all([fetchPendingBookContents(), fetchPendingMovieQuotes()])
-      .then(([bookRows, movieRows]) => {
+    Promise.all([
+      fetchPendingBookContents(),
+      fetchPendingMovieQuotes(),
+      // generated_questions is a newer, separately-migrated table — isolate it
+      // so a not-yet-applied migration doesn't take down the whole panel.
+      fetchApprovedSentences().catch(() => []),
+      fetchPendingGeneratedQuestions().catch(() => []),
+    ])
+      .then(([bookRows, movieRows, approvedRows, generatedRows]) => {
         setBooks(bookRows);
         setMovies(movieRows);
+        setApprovedSentences(approvedRows);
+        setGeneratedQuestions(generatedRows);
       })
       .catch(() => setLoadError('검수 대기 목록을 불러오지 못했습니다.'))
       .finally(() => setIsLoading(false));
@@ -46,7 +71,7 @@ export const AdminReviewPanel: React.FC<AdminReviewPanelProps> = ({ onClose }) =
   };
 
   const handleAction = async (
-    table: 'book_contents' | 'movie_quotes_ko_en',
+    table: ReviewTable,
     id: string | number,
     action: 'approve' | 'reject'
   ) => {
@@ -61,8 +86,10 @@ export const AdminReviewPanel: React.FC<AdminReviewPanelProps> = ({ onClose }) =
       await submitReview(passcode, table, id, action);
       if (table === 'book_contents') {
         setBooks(prev => prev.filter(b => b.candidateId !== id));
-      } else {
+      } else if (table === 'movie_quotes_ko_en') {
         setMovies(prev => prev.filter(m => m.id !== id));
+      } else {
+        setGeneratedQuestions(prev => prev.filter(g => g.id !== id));
       }
     } catch (err) {
       if (err instanceof Error && err.message.includes('401')) {
@@ -72,6 +99,29 @@ export const AdminReviewPanel: React.FC<AdminReviewPanelProps> = ({ onClose }) =
       setActionError(err instanceof Error ? err.message : '처리 중 오류가 발생했습니다.');
     } finally {
       setProcessingId(null);
+    }
+  };
+
+  const handleGenerate = async (sentence: ApprovedSentence, type: GeneratedQuestionType) => {
+    if (!passcode) {
+      setActionError('먼저 패스코드를 입력해주세요.');
+      return;
+    }
+    const key = `${sentence.sourceTable}-${sentence.sourceId}-${type}`;
+    setGeneratingKey(key);
+    setActionError(null);
+    try {
+      await generateQuestion(passcode, sentence.sourceTable, sentence.sourceId, type);
+      const refreshed = await fetchPendingGeneratedQuestions();
+      setGeneratedQuestions(refreshed);
+    } catch (err) {
+      if (err instanceof Error && err.message.includes('401')) {
+        sessionStorage.removeItem(PASSCODE_KEY);
+        setPasscode('');
+      }
+      setActionError(err instanceof Error ? err.message : 'AI 문제 생성에 실패했습니다.');
+    } finally {
+      setGeneratingKey(null);
     }
   };
 
@@ -188,6 +238,97 @@ export const AdminReviewPanel: React.FC<AdminReviewPanelProps> = ({ onClose }) =
                         <button
                           disabled={processingId === `movie_quotes_ko_en-${m.id}`}
                           onClick={() => handleAction('movie_quotes_ko_en', m.id, 'reject')}
+                          className="flex-1 py-2 rounded-full bg-surface-container-high text-error text-xs font-bold cursor-pointer hover:bg-error-container/30 disabled:opacity-50"
+                        >
+                          거부
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+
+            {/* AI Question Generation */}
+            <section className="space-y-3">
+              <h2 className="text-sm font-bold text-on-surface">
+                AI 문제 생성 <span className="text-on-surface-variant font-normal">(승인된 문장 {approvedSentences.length}개)</span>
+              </h2>
+              {approvedSentences.length === 0 ? (
+                <p className="text-xs text-on-surface-variant">문제를 생성할 승인된 문장이 없습니다.</p>
+              ) : (
+                <div className="space-y-2.5">
+                  {approvedSentences.map(s => (
+                    <div
+                      key={`${s.sourceTable}-${s.sourceId}`}
+                      className="p-4 rounded-2xl bg-surface-container-lowest border border-white/80 shadow-xs space-y-2"
+                    >
+                      <p className="text-[11px] font-semibold text-secondary">
+                        {s.workTitle} · 실제 출제 유형: {QUESTION_TYPE_LABELS[s.questionType]}
+                      </p>
+                      <p className="text-sm font-semibold text-on-surface leading-relaxed">{s.englishText}</p>
+                      <p className="text-xs text-on-surface-variant leading-relaxed">{s.koreanText}</p>
+                      <div className="flex items-center gap-2 pt-1 flex-wrap">
+                        <button
+                          disabled={generatingKey === `${s.sourceTable}-${s.sourceId}-${s.questionType}`}
+                          onClick={() => handleGenerate(s, s.questionType)}
+                          className="px-3 py-2 rounded-full bg-secondary-container/40 text-secondary text-xs font-bold cursor-pointer hover:bg-secondary-container/70 disabled:opacity-50"
+                        >
+                          {generatingKey === `${s.sourceTable}-${s.sourceId}-${s.questionType}`
+                            ? '생성 중...'
+                            : `AI로 "${QUESTION_TYPE_LABELS[s.questionType]}" 생성`}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+
+            {/* Generated Question Review Queue */}
+            <section className="space-y-3">
+              <h2 className="text-sm font-bold text-on-surface">
+                생성된 문제 검토 대기 <span className="text-on-surface-variant font-normal">({generatedQuestions.length})</span>
+              </h2>
+              {generatedQuestions.length === 0 ? (
+                <p className="text-xs text-on-surface-variant">검토 대기 중인 생성 문제가 없습니다.</p>
+              ) : (
+                <div className="space-y-2.5">
+                  {generatedQuestions.map(q => (
+                    <div
+                      key={q.id}
+                      className="p-4 rounded-2xl bg-surface-container-lowest border border-white/80 shadow-xs space-y-2"
+                    >
+                      <p className="text-[11px] font-semibold text-secondary">
+                        {q.workTitle} · {QUESTION_TYPE_LABELS[q.questionType]}
+                      </p>
+                      <p className="text-xs text-on-surface-variant">{q.prompt}</p>
+                      <p className="text-sm font-semibold text-on-surface leading-relaxed">{q.sentence}</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {q.options.map((opt, i) => (
+                          <span
+                            key={i}
+                            className="px-2.5 py-1 rounded-full bg-surface-container-low text-xs font-semibold text-on-surface"
+                          >
+                            {opt}
+                          </span>
+                        ))}
+                      </div>
+                      <p className="text-xs font-bold text-primary">
+                        정답: {Array.isArray(q.correctAnswer) ? q.correctAnswer.join(' ') : q.correctAnswer}
+                      </p>
+                      <p className="text-xs text-on-surface-variant leading-relaxed">{q.explanation}</p>
+                      <div className="flex items-center gap-2 pt-1">
+                        <button
+                          disabled={processingId === `generated_questions-${q.id}`}
+                          onClick={() => handleAction('generated_questions', q.id, 'approve')}
+                          className="flex-1 py-2 rounded-full bg-primary text-on-primary text-xs font-bold cursor-pointer hover:bg-primary/90 disabled:opacity-50"
+                        >
+                          승인
+                        </button>
+                        <button
+                          disabled={processingId === `generated_questions-${q.id}`}
+                          onClick={() => handleAction('generated_questions', q.id, 'reject')}
                           className="flex-1 py-2 rounded-full bg-surface-container-high text-error text-xs font-bold cursor-pointer hover:bg-error-container/30 disabled:opacity-50"
                         >
                           거부

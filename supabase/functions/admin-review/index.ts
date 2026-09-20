@@ -18,6 +18,7 @@ const CORS_HEADERS = {
 const ALLOWED_TABLES: Record<string, { idColumn: string }> = {
   book_contents: { idColumn: 'candidate_id' },
   movie_quotes_ko_en: { idColumn: 'id' },
+  generated_questions: { idColumn: 'id' },
 };
 
 type ReviewRequestBody = {

@@ -9,17 +9,25 @@ const features = [
 ];
 
 const books = [
-  ['The Little Prince', '어린 왕자', 'Antoine de Saint-Exupéry', 'cyan'],
-  ['Alice in Wonderland', '이상한 나라의 앨리스', 'Lewis Carroll', 'pink'],
+  ['The Happy Prince', '행복한 왕자', 'Oscar Wilde', 'cyan'],
+  ['Adventures of Sherlock Holmes', '셜록 홈즈의 모험', 'Arthur Conan Doyle', 'pink'],
   ['The Great Gatsby', '위대한 개츠비', 'F. Scott Fitzgerald', 'gold'],
-  ['Pride & Prejudice', '오만과 편견', 'Jane Austen', 'violet'],
+  ['Pride and Prejudice', '오만과 편견', 'Jane Austen', 'violet'],
+  ['Frankenstein', '프랑켄슈타인', 'Mary Shelley', 'cyan'],
 ];
 
-const reviews = [
-  ['이진원', '“원서 읽기의 허들이 낮아졌어요. 한 문장씩 문맥으로 익히니 표현이 오래 기억됩니다.”'],
-  ['박한호', '“출퇴근길에 5분씩 읽는데, 퀘스트처럼 이어져서 자연스럽게 매일 찾게 됩니다.”'],
-  ['장세빈', '“영어를 책 속 장면으로 만나는 순간이 즐거워졌어요. 문장 주목이 달라졌습니다.”'],
+const audiences = [
+  ['💼', '토익·오픽 준비생', '단어 목록 암기 대신, 실전 문장과 맥락 속에서 표현을 익히고 싶은 분께 맞습니다.'],
+  ['📖', '원서 완독에 도전하는 분', '완역이 아닌 원문으로, 짧은 핵심 문장부터 부담 없이 시작할 수 있습니다.'],
+  ['🎬', '영화·미디어로 배우고 싶은 분', '고전 소설뿐 아니라 영화 명대사로도 같은 방식의 문맥 학습을 이어갈 수 있습니다.'],
 ];
+
+const featureDetails: Record<string, { label: string; items: string[] }> = {
+  cyan: { label: '학습 흐름', items: ['장면 읽기', '문장 이해', '표현 복습'] },
+  pink: { label: '복습 주기', items: ['24시간 후', '3일 후', '7일 후'] },
+  gold: { label: '오늘의 퀘스트', items: ['문장 1개', '퀴즈 3개', '스트릭 유지'] },
+  violet: { label: '콘텐츠 확장', items: ['고전 원서', '영화 대사', '준비 중'] },
+};
 
 export const OnboardingModal: React.FC = () => {
   const { showOnboarding, setShowOnboarding, setActiveTab, showToast, updateUserProfile } = useApp();
@@ -62,7 +70,7 @@ export const OnboardingModal: React.FC = () => {
             <section className="ws-lumi-stage">
               <div className="ws-lumi-stage__head"><span>✨ 3D 시각 몰입 학습</span><b>● Lumi와 함께 탐험</b></div>
               <div className="ws-lumi-image"><img src="/wordscene-entry.png" alt="루미 공식 마스코트" /><div><span className="material-symbols-outlined">menu_book</span><p><b>반짝이는 나의 영어 여정</b><small>생생한 장면 속에서 피어나는 언어 감각</small></p></div></div>
-              <div className="ws-lumi-stats"><p><b>2,400+</b><span>엄선된 원서 명대사</span></p><p><b>10분</b><span>일일 집중 습관</span></p><p><b>98.4%</b><span>학습 몰입 만족도</span></p></div>
+              <div className="ws-lumi-stats"><p><b>111개</b><span>엄선된 원서·영화 명문장</span></p><p><b>14편</b><span>고전 원서 + 영화</span></p><p><b>10분</b><span>권장 일일 학습</span></p></div>
             </section>
             <section className="ws-goal-panel">
               <div className="ws-goal-progress"><div><span>맞춤 학습 세팅 1단계</span><b>진행도 <em>1 / 3</em></b></div><i><b /></i></div>
@@ -110,15 +118,14 @@ export const OnboardingModal: React.FC = () => {
               <button className="ws-primary-cta" type="button" onClick={() => setOnboardingPage('goal')}><span>무료로 시작하기 (첫 진단 테스트)</span><span className="material-symbols-outlined">arrow_forward</span></button>
               <button className="ws-secondary-cta" type="button" onClick={() => enterApp('explore', '명작 도서관을 둘러보세요.')}><span className="material-symbols-outlined">play_circle</span>작품 둘러보기</button>
             </div>
-            <div className="ws-proof"><span>🔥 누적 완독 1,280,000+ 문장</span><span>⭐ 학습자 만족도 4.9 / 5.0</span><span>🌱 일일 복습 달성률 94%</span></div>
-            <div className="ws-learners"><span className="ws-learner-stack"><i>윤</i><i>민</i><i>지</i></span><p>오늘도 <b>14,230명</b>이 마법 원서를 읽고 있어요</p></div>
+            <div className="ws-proof"><span>📚 엄선된 명문장·명대사 111개</span><span>🎬 원서 5권 · 영화 9편 수록</span><span>🤖 AI 튜터의 실시간 문장 설명</span></div>
           </div>
 
           <div className="ws-product-card" aria-label="WordScene 학습 화면 미리보기">
             <div className="ws-product-card__bar"><div><i /><i /><i /></div><span>✨ Today · 5 min</span></div>
-            <div className="ws-product-card__visual"><img src="/wordscene-entry.png" alt="루미와 반짝이는 WordScene 학습 화면" /><span>⚡ 어휘 적중률 98.4%</span></div>
+            <div className="ws-product-card__visual"><img src="/wordscene-entry.png" alt="루미와 반짝이는 WordScene 학습 화면" /><span>📖 공개 판본 원문 그대로 학습</span></div>
             <div className="ws-product-steps">
-              <div><b>🎯</b><span><strong>Step 1 · 관심 분야 선택하기</strong><small>어린왕자 · 이상한 나라의 앨리스</small></span><i>✓</i></div>
+              <div><b>🎯</b><span><strong>Step 1 · 관심 분야 선택하기</strong><small>행복한 왕자 · 셜록 홈즈의 모험</small></span><i>✓</i></div>
               <div className="active"><b>🧠</b><span><strong>Step 2 · 1분 실력 진단</strong><small className="ws-mini-progress"><i /></small></span><i>진행중</i></div>
               <div><b>📅</b><span><strong>Step 3 · 매일 5분 문장 습관</strong><small>출퇴근길 한 장면씩 완성</small></span><i>🔒</i></div>
             </div>
@@ -141,7 +148,10 @@ export const OnboardingModal: React.FC = () => {
         <section id="features" className="ws-features-section">
           <div className="ws-section-intro"><span>WHY WORDSCENE</span><h2>단순 암기는 그만,<br /><em>한 편의 장면</em>으로 기억되는 학습</h2><p>읽기부터 복습까지, 이야기가 있는 문장을 하나의 학습 흐름으로 연결했습니다.</p></div>
           <div className="ws-feature-grid">
-            {features.map(([icon, tone, title, copy]) => <article className={`ws-feature-card ws-feature-card--${tone}`} key={title}><span className="material-symbols-outlined">{icon}</span><h3>{title}</h3><p>{copy}</p><div className="ws-feature-art"><i /><i /><i /></div></article>)}
+            {features.map(([icon, tone, title, copy]) => {
+              const detail = featureDetails[tone];
+              return <article className={`ws-feature-card ws-feature-card--${tone}`} key={title}><span className="material-symbols-outlined">{icon}</span><h3>{title}</h3><p>{copy}</p><div className="ws-feature-foot"><small>{detail.label}</small><div>{detail.items.map((item, index) => <React.Fragment key={item}><b>{item}</b>{index < detail.items.length - 1 && <i>→</i>}</React.Fragment>)}</div></div></article>;
+            })}
           </div>
         </section>
 
@@ -153,8 +163,8 @@ export const OnboardingModal: React.FC = () => {
         </section>
 
         <section id="reviews" className="ws-reviews-section">
-          <div className="ws-section-intro"><span>USER TESTIMONIALS</span><h2>학습자들이 전하는 <em>진짜 변화</em></h2></div>
-          <div className="ws-review-grid">{reviews.map(([name, quote], index) => <article key={name}><div>★★★★★</div><p>{quote}</p><span className={`ws-review-avatar avatar-${index}`}>{name.slice(0, 1)}</span><b>{name}</b><small>WordScene 학습자</small></article>)}</div>
+          <div className="ws-section-intro"><span>WHO IT'S FOR</span><h2>이런 분들께 <em>추천해요</em></h2></div>
+          <div className="ws-review-grid">{audiences.map(([icon, persona, text], index) => <article key={persona}><span className={`ws-review-avatar avatar-${index}`}>{icon}</span><b>{persona}</b><p>{text}</p></article>)}</div>
         </section>
 
         <section id="faq" className="ws-faq-section">

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Work, Difficulty, MediaCategory } from '../../types';
+import { getPreviewSentence } from '../../lib/contentService';
 
 export const ExploreView: React.FC = () => {
-  const { works, startWorkLesson, showToast } = useApp();
+  const { works, questionsByWork, startWorkLesson, showToast } = useApp();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -170,9 +171,11 @@ export const ExploreView: React.FC = () => {
                   />
                   <div className="flex-1 min-w-0">
                     <h3 className="text-base font-extrabold text-on-surface truncate group-hover:text-primary transition-colors">
-                      {work.title}
+                      {work.koreanTitle}
                     </h3>
-                    <p className="text-xs font-semibold text-secondary truncate">{work.koreanTitle}</p>
+                    {work.title !== work.koreanTitle && (
+                      <p className="text-xs font-semibold text-secondary truncate">{work.title}</p>
+                    )}
                     <p className="text-xs text-on-surface-variant mt-1 line-clamp-1">{work.author}</p>
                     <p className="text-xs text-on-surface-variant/80 mt-1 line-clamp-2 leading-relaxed">
                       {work.description}
@@ -246,8 +249,10 @@ export const ExploreView: React.FC = () => {
                 <span className="px-2.5 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed text-xs font-bold">
                   {activeModalWork.difficulty}
                 </span>
-                <h2 className="text-xl font-extrabold text-on-surface mt-2">{activeModalWork.title}</h2>
-                <p className="text-xs font-bold text-secondary">{activeModalWork.koreanTitle}</p>
+                <h2 className="text-xl font-extrabold text-on-surface mt-2">{activeModalWork.koreanTitle}</h2>
+                {activeModalWork.title !== activeModalWork.koreanTitle && (
+                  <p className="text-xs font-bold text-secondary">{activeModalWork.title}</p>
+                )}
                 <p className="text-xs text-on-surface-variant mt-1">{activeModalWork.author}</p>
                 <div className="flex items-center gap-2 mt-2 text-xs font-semibold text-primary">
                   <span>총 {activeModalWork.totalSentences}개 핵심 문장</span>
@@ -266,10 +271,17 @@ export const ExploreView: React.FC = () => {
 
             <div className="space-y-2">
               <h4 className="text-xs font-bold text-on-surface uppercase tracking-wider">수록 명문장 맛보기</h4>
-              <div className="p-3 rounded-xl bg-surface-container-lowest border border-surface-container-high text-xs space-y-1">
-                <p className="font-semibold text-on-surface">“The unexpected compliment made her face glow with delight.”</p>
-                <p className="text-on-surface-variant">뜻밖의 칭찬에 그녀의 얼굴은 기쁨으로 환하게 빛났다.</p>
-              </div>
+              {(() => {
+                const preview = getPreviewSentence(questionsByWork, activeModalWork.id);
+                return preview ? (
+                  <div className="p-3 rounded-xl bg-surface-container-lowest border border-surface-container-high text-xs space-y-1">
+                    <p className="font-semibold text-on-surface">“{preview.english}”</p>
+                    <p className="text-on-surface-variant">{preview.korean}</p>
+                  </div>
+                ) : (
+                  <p className="text-xs text-on-surface-variant">학습을 시작하면 명문장을 확인할 수 있어요.</p>
+                );
+              })()}
             </div>
 
             <div className="flex items-center gap-3 pt-2">

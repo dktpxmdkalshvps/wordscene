@@ -29,6 +29,7 @@ interface AppContextType {
   todayStatus: UserTodayStatus;
   setTodayStatus: (status: UserTodayStatus) => void;
   works: Work[];
+  questionsByWork: Record<string, Question[]>;
   activeSession: LearningSession | null;
   lastResult: SessionResult | null;
   reviewItems: ReviewItem[];
@@ -421,6 +422,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         todayStatus,
         setTodayStatus,
         works,
+        questionsByWork,
         activeSession,
         lastResult,
         reviewItems,

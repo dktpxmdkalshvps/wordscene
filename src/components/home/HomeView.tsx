@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { HERO_SENTENCE } from '../../data/mockData';
+import { getPreviewSentence } from '../../lib/contentService';
 import { speakEnglishText } from '../../utils/speech';
 
 export const HomeView: React.FC = () => {
@@ -9,6 +9,7 @@ export const HomeView: React.FC = () => {
     todayStatus,
     setTodayStatus,
     works,
+    questionsByWork,
     reviewItems,
     savedSentences,
     weeklyStats,
@@ -27,10 +28,16 @@ export const HomeView: React.FC = () => {
 
   const unmasteredReviews = reviewItems.filter(r => !r.mastered);
 
+  // The same work/question startDailyLesson would actually open
+  const currentWork = works.find(w => !w.isLocked) ?? works[0];
+  const currentQuestion = currentWork ? questionsByWork[currentWork.id]?.[0] : undefined;
+  const currentPreview = currentWork ? getPreviewSentence(questionsByWork, currentWork.id) : null;
+
   // Play audio sentence
   const handlePlayAudio = () => {
+    if (!currentPreview) return;
     setIsPlayingAudio(true);
-    speakEnglishText(HERO_SENTENCE.english, user.speechRate);
+    speakEnglishText(currentPreview.english, user.speechRate);
     setTimeout(() => setIsPlayingAudio(false), 2200);
   };
 
@@ -160,9 +167,14 @@ export const HomeView: React.FC = () => {
           <div className="space-y-1 mb-5">
             <div className="flex items-center gap-2">
               <span className="material-symbols-outlined text-secondary text-xl">bookmark_heart</span>
-              <h2 className="text-xl sm:text-2xl font-extrabold text-on-surface tracking-tight">The Happy Prince</h2>
+              <h2 className="text-xl sm:text-2xl font-extrabold text-on-surface tracking-tight">
+                {currentWork?.koreanTitle ?? '학습 준비 중'}
+              </h2>
             </div>
-            <p className="text-xs sm:text-sm text-on-surface-variant pl-7">오스카 와일드 · 챕터 3 : 제비의 전언</p>
+            <p className="text-xs sm:text-sm text-on-surface-variant pl-7">
+              {currentWork?.author}
+              {currentQuestion?.sourceContext ? ` · ${currentQuestion.sourceContext}` : ''}
+            </p>
           </div>
 
           {/* Sentence Focus Card with Holographic Tint */}
@@ -171,25 +183,23 @@ export const HomeView: React.FC = () => {
               <div className="flex items-start gap-3 flex-1 min-w-0">
                 <span className="material-symbols-outlined text-primary text-2xl mt-0.5 shrink-0">format_quote</span>
                 <div className="space-y-2 flex-1 min-w-0">
-                  <p className="text-base sm:text-lg text-on-surface font-semibold leading-relaxed break-words">
-                    “The unexpected compliment made her face{' '}
-                    <span className="text-secondary underline decoration-secondary/50 font-bold decoration-2 underline-offset-4">
-                      glow
-                    </span>{' '}
-                    with delight.”
-                  </p>
-                  <p className="text-xs sm:text-sm text-on-surface-variant font-medium">
-                    뜻밖의 칭찬에 그녀의 얼굴은 기쁨으로 환하게 빛났다.
-                  </p>
-
-                  <div className="flex flex-wrap gap-2 pt-1">
-                    <span className="px-2.5 py-0.5 rounded-full bg-primary-container/40 text-on-primary-container text-xs font-semibold">
-                      glow : 빛나다, 온기를 띠다
-                    </span>
-                    <span className="px-2.5 py-0.5 rounded-full bg-secondary-container/30 text-on-secondary-container text-xs font-semibold">
-                      delight : 큰 기쁨
-                    </span>
-                  </div>
+                  {currentPreview ? (
+                    <>
+                      <p className="text-base sm:text-lg text-on-surface font-semibold leading-relaxed break-words">
+                        “{currentPreview.english}”
+                      </p>
+                      <p className="text-xs sm:text-sm text-on-surface-variant font-medium">
+                        {currentPreview.korean}
+                      </p>
+                      {currentQuestion?.explanation && (
+                        <p className="text-xs text-on-surface-variant/80 leading-relaxed pt-1">
+                          {currentQuestion.explanation}
+                        </p>
+                      )}
+                    </>
+                  ) : (
+                    <p className="text-sm text-on-surface-variant">학습 콘텐츠를 불러오는 중입니다...</p>
+                  )}
                 </div>
               </div>
 
