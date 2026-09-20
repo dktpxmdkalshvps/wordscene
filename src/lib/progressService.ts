@@ -59,3 +59,17 @@ export const syncProgress = async (deviceId: string, snapshot: RemoteProgress): 
     // localStorage remains the source of truth on failure
   }
 };
+
+/** Removes the anonymous device snapshot before a factory reset.
+ * A failed request is safe: the caller also discards the local device id,
+ * so the next launch begins with a new blank device identity. */
+export const deleteProgress = async (deviceId: string): Promise<void> => {
+  try {
+    await restRequest(`device_progress?device_id=eq.${encodeURIComponent(deviceId)}`, {
+      method: 'DELETE',
+      headers: { Prefer: 'return=minimal' },
+    });
+  } catch {
+    // Keep factory reset usable offline or when Supabase is unavailable.
+  }
+};

@@ -177,7 +177,7 @@ export const ProfileView: React.FC = () => {
             className="flex-1 py-3 rounded-full bg-surface-container-low text-error text-xs font-bold hover:bg-error-container/30 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
           >
             <span className="material-symbols-outlined text-base">restart_alt</span>
-            <span>체험 데이터 초기화</span>
+            <span>모든 체험 데이터 삭제 후 처음부터 시작</span>
           </button>
         </div>
       </div>

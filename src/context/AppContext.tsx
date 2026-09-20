@@ -22,7 +22,7 @@ import {
 } from '../data/mockData';
 import { loadContentCatalog, localCatalog } from '../lib/contentService';
 import { getDeviceId } from '../lib/deviceId';
-import { loadProgress, syncProgress, RemoteProgress } from '../lib/progressService';
+import { deleteProgress, loadProgress, syncProgress, RemoteProgress } from '../lib/progressService';
 
 interface AppContextType {
   user: UserProfile;
@@ -56,11 +56,34 @@ interface AppContextType {
   isSentenceSaved: (sentenceId: string) => boolean;
   markReviewMastered: (reviewId: string) => void;
   deleteSavedSentence: (saveId: string) => void;
-  resetDemoData: () => void;
+  resetDemoData: () => Promise<void>;
   updateUserProfile: (partial: Partial<UserProfile>) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
+
+const FRESH_PROFILE: UserProfile = {
+  name: '학습자',
+  level: 1,
+  levelTitle: 'Lv.1 첫 문장',
+  totalXp: 0,
+  streakDays: 0,
+  targetDailyMinutes: 10,
+  selectedLanguage: '영어 🇺🇸',
+  soundEnabled: true,
+  speechRate: 0.9,
+};
+
+const freshWeeklyStats = (): WeeklyStat[] => INITIAL_WEEKLY_STATS.map(day => ({
+  ...day,
+  isCompleted: false,
+  count: 0,
+}));
+
+const freshWorks = (items: Work[]): Work[] => items.map(work => ({
+  ...work,
+  completedSentences: 0,
+}));
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<UserProfile>(() => {
@@ -68,21 +91,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (saved) {
       try { return JSON.parse(saved); } catch {}
     }
-    return {
-      name: '지우',
-      level: 4,
-      levelTitle: 'Lv.4 탐험가',
-      totalXp: 320,
-      streakDays: 3,
-      targetDailyMinutes: 10,
-      selectedLanguage: '영어 🇺🇸',
-      soundEnabled: true,
-      speechRate: 0.9,
-    };
+    return FRESH_PROFILE;
   });
 
-  const [todayStatus, setTodayStatus] = useState<UserTodayStatus>('in_progress');
-  const [works, setWorks] = useState<Work[]>(INITIAL_WORKS);
+  const [todayStatus, setTodayStatus] = useState<UserTodayStatus>('not_started');
+  const [works, setWorks] = useState<Work[]>(() => freshWorks(INITIAL_WORKS));
   const [questionsByWork, setQuestionsByWork] = useState<Record<string, Question[]>>(() => localCatalog().questionsByWork);
   const [activeSession, setActiveSession] = useState<LearningSession | null>(null);
   const [lastResult, setLastResult] = useState<SessionResult | null>(null);
@@ -91,16 +104,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (saved) {
       try { return JSON.parse(saved); } catch {}
     }
-    return INITIAL_REVIEWS;
+    return [];
   });
   const [savedSentences, setSavedSentences] = useState<SavedSentence[]>(() => {
     const saved = localStorage.getItem('ws_saved');
     if (saved) {
       try { return JSON.parse(saved); } catch {}
     }
-    return INITIAL_SAVED;
+    return [];
   });
-  const [weeklyStats, setWeeklyStats] = useState<WeeklyStat[]>(INITIAL_WEEKLY_STATS);
+  const [weeklyStats, setWeeklyStats] = useState<WeeklyStat[]>(freshWeeklyStats);
   const [activeTab, setActiveTab] = useState<string>('home');
   const [selectedWorkDetail, setSelectedWorkDetail] = useState<Work | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -130,12 +143,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     loadContentCatalog().then(catalog => {
       if (!active) return;
       const remote = remoteProgressRef.current;
-      const merged = remote
-        ? catalog.works.map(w => ({
-            ...w,
-            completedSentences: remote.workProgress[w.id] ?? w.completedSentences,
-          }))
-        : catalog.works;
+      const merged = catalog.works.map(w => ({
+        ...w,
+        completedSentences: remote?.workProgress[w.id] ?? 0,
+      }));
       setWorks(merged);
       setQuestionsByWork(catalog.questionsByWork);
     });
@@ -387,25 +398,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast('문장 보관을 해제했습니다.');
   };
 
-  const resetDemoData = () => {
-    setUser({
-      name: '지우',
-      level: 4,
-      levelTitle: 'Lv.4 탐험가',
-      totalXp: 320,
-      streakDays: 3,
-      targetDailyMinutes: 10,
-      selectedLanguage: '영어 🇺🇸',
-      soundEnabled: true,
-      speechRate: 0.9,
-    });
-    setTodayStatus('in_progress');
-    setWorks(INITIAL_WORKS);
-    setReviewItems(INITIAL_REVIEWS);
-    setSavedSentences(INITIAL_SAVED);
-    setActiveSession(null);
-    setLastResult(null);
-    showToast('체험 데이터가 초기 상태로 리셋되었습니다.');
+  const resetDemoData = async () => {
+    const approved = window.confirm('학습 진도, XP, 스트릭, 오답·저장 문장과 온보딩 기록을 모두 삭제하고 처음부터 시작할까요?');
+    if (!approved) return;
+
+    await deleteProgress(deviceId);
+    Object.keys(localStorage)
+      .filter(key => key.startsWith('ws_'))
+      .forEach(key => localStorage.removeItem(key));
+    window.location.reload();
   };
 
   const updateUserProfile = (partial: Partial<UserProfile>) => {
