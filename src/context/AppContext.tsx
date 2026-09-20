@@ -37,6 +37,8 @@ interface AppContextType {
   weeklyStats: WeeklyStat[];
   activeTab: string;
   setActiveTab: (tab: string) => void;
+  exploreCategory: string;
+  setExploreCategory: (category: string) => void;
   selectedWorkDetail: Work | null;
   setSelectedWorkDetail: (work: Work | null) => void;
   toastMessage: string | null;
@@ -116,6 +118,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
   const [weeklyStats, setWeeklyStats] = useState<WeeklyStat[]>(freshWeeklyStats);
   const [activeTab, setActiveTab] = useState<string>('home');
+  const [exploreCategory, setExploreCategory] = useState<string>('all');
   const [selectedWorkDetail, setSelectedWorkDetail] = useState<Work | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [showOnboarding, setShowOnboarding] = useState<boolean>(() => (
@@ -430,6 +433,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         weeklyStats,
         activeTab,
         setActiveTab,
+        exploreCategory,
+        setExploreCategory,
         selectedWorkDetail,
         setSelectedWorkDetail,
         toastMessage,
