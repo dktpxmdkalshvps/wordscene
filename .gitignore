@@ -10,3 +10,6 @@ supabase/.temp/
 .claude/
 .openai/
 .vercel/
+test-results/
+playwright-report/
+playwright/.cache/

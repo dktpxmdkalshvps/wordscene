@@ -3,6 +3,9 @@ import { useApp } from '../../context/AppContext';
 import { getPreviewSentence } from '../../lib/contentService';
 import { speakEnglishText } from '../../utils/speech';
 
+const LIBRARY_SCENE_IMAGE =
+  'https://polyfork.dev/files/library-book-stack-double-ce8d7f/renders/hero.png';
+
 export const HomeView: React.FC = () => {
   const {
     user,
@@ -53,7 +56,7 @@ export const HomeView: React.FC = () => {
         ctaText: '오늘의 학습 시작하기',
         helperText: '새로운 10개의 명작 문장이 준비되어 있습니다.',
         action: startDailyLesson,
-        btnGradient: 'bg-primary text-on-primary hover:bg-primary/90'
+        btnGradient: 'bg-primary text-on-primary hover:bg-[#005b63]'
       };
     }
     if (todayStatus === 'completed') {
@@ -66,7 +69,7 @@ export const HomeView: React.FC = () => {
         ctaText: '오늘 학습 복습하기 (오답 체크)',
         helperText: '오늘 목표를 모두 완주하셨습니다! 복습으로 완벽히 기억해보세요.',
         action: startReviewSession,
-        btnGradient: 'bg-secondary text-on-secondary hover:bg-secondary/90'
+        btnGradient: 'bg-secondary text-on-secondary hover:bg-[#8e2864]'
       };
     }
     // in_progress (default)
@@ -79,19 +82,19 @@ export const HomeView: React.FC = () => {
       ctaText: '이어서 학습하기 (4/10)',
       helperText: '저장된 문장 위치에서 바로 재개됩니다. 3분 뒤 복습 주기에 반영돼요.',
       action: startDailyLesson,
-      btnGradient: 'bg-gradient-to-r from-primary via-secondary to-primary-container text-on-primary'
+      btnGradient: 'bg-primary text-on-primary hover:bg-[#005b63]'
     };
   };
 
   const ctaConfig = getCtaConfig();
 
   return (
-    <div className="w-full max-w-[1240px] mx-auto px-4 sm:px-6 py-4 sm:py-6 flex flex-col xl:flex-row gap-6">
+    <div className="w-full max-w-[1240px] mx-auto px-4 sm:px-6 py-6 sm:py-8 flex flex-col xl:flex-row gap-6">
       {/* Main Column */}
       <div className="flex-1 min-w-0 flex flex-col space-y-6">
         
         {/* State Engine Simulator Banner */}
-        <section className="relative w-full rounded-2xl p-4 overflow-hidden bg-gradient-to-r from-primary-container/30 via-secondary-container/20 to-tertiary-container/30 backdrop-blur-xl border border-white/60 shadow-xs">
+        <section className="hidden relative w-full rounded-2xl p-4 overflow-hidden bg-gradient-to-r from-primary-container/30 via-secondary-container/20 to-tertiary-container/30 backdrop-blur-xl border border-white/60 shadow-xs">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <span className="flex h-3 w-3 relative">
@@ -139,15 +142,15 @@ export const HomeView: React.FC = () => {
         </section>
 
         {/* Hero Daily Lesson Card (Section 5.1 & 5.2) */}
-        <section className="relative w-full rounded-3xl p-6 sm:p-8 bg-surface-container-lowest/90 backdrop-blur-2xl border border-white/80 shadow-[0_20px_40px_-8px_rgba(46,16,101,0.12),0_6px_16px_-2px_rgba(103,232,249,0.18)] overflow-hidden">
-          {/* Iridescent Gloss Overlay Top Rim */}
-          <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary-container via-secondary-container to-tertiary-container"></div>
-          <div className="absolute -right-16 -top-16 w-48 h-48 rounded-full bg-primary-container/20 blur-3xl pointer-events-none"></div>
+        <section className="relative w-full rounded-[1.5rem] p-5 sm:p-7 bg-white border border-[#dce5e4] shadow-[0_10px_30px_rgba(32,55,58,0.06)] overflow-hidden">
+
+          <div className="relative grid gap-6 lg:grid-cols-[minmax(0,1fr)_15rem] lg:items-stretch">
+            <div className="min-w-0">
 
           {/* Header Meta of Lesson Card */}
           <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
             <div className="flex items-center gap-2">
-              <span className="px-3 py-1 rounded-full bg-primary-fixed text-on-primary-fixed text-xs font-bold flex items-center gap-1.5 shadow-xs">
+              <span className="px-2.5 py-1 rounded-md bg-[#e5f3f0] text-[#176b68] text-xs font-bold flex items-center gap-1.5">
                 <span className="material-symbols-outlined text-[15px]">auto_stories</span>
                 <span>원서 낭독 회차</span>
               </span>
@@ -178,7 +181,7 @@ export const HomeView: React.FC = () => {
           </div>
 
           {/* Sentence Focus Card with Holographic Tint */}
-          <div className="relative rounded-2xl p-5 bg-surface-container-low/90 border border-white/60 mb-6 shadow-inner">
+          <div className="relative rounded-xl p-5 bg-[#f6f8f6] border border-[#e5ecea] mb-6">
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-start gap-3 flex-1 min-w-0">
                 <span className="material-symbols-outlined text-primary text-2xl mt-0.5 shrink-0">format_quote</span>
@@ -209,7 +212,7 @@ export const HomeView: React.FC = () => {
                 className={`p-2.5 rounded-full transition-all shrink-0 cursor-pointer ${
                   isPlayingAudio
                     ? 'bg-secondary text-on-secondary scale-110 shadow-md animate-pulse'
-                    : 'bg-surface-container-highest/90 text-primary hover:bg-primary-container hover:text-on-primary-container'
+                    : 'bg-white border border-[#dce5e4] text-primary hover:bg-[#e5f3f0] hover:text-on-primary-container'
                 }`}
                 title="원어민 발음 듣기"
               >
@@ -227,9 +230,9 @@ export const HomeView: React.FC = () => {
               </span>
               <span className="font-extrabold text-primary">{ctaConfig.percent}</span>
             </div>
-            <div className="w-full h-3 rounded-full bg-surface-container-high overflow-hidden p-0.5 shadow-inner">
+            <div className="w-full h-2 rounded-full bg-[#e7eeec] overflow-hidden">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-primary via-primary-container to-secondary transition-all duration-500 shadow-sm"
+                className="h-full rounded-full bg-primary transition-all duration-500"
                 style={{ width: ctaConfig.progressWidth }}
               ></div>
             </div>
@@ -239,9 +242,8 @@ export const HomeView: React.FC = () => {
           <div className="flex flex-col items-center gap-2">
             <button
               onClick={ctaConfig.action}
-              className={`w-full min-h-[56px] py-4 px-6 rounded-full font-extrabold text-base sm:text-lg shadow-lg hover:shadow-xl active:scale-[0.98] transition-all flex items-center justify-center gap-2 relative overflow-hidden group cursor-pointer ${ctaConfig.btnGradient}`}
+              className={`w-full min-h-[54px] py-4 px-6 rounded-xl font-extrabold text-base sm:text-lg shadow-sm hover:shadow-md active:scale-[0.98] transition-all flex items-center justify-center gap-2 relative overflow-hidden group cursor-pointer ${ctaConfig.btnGradient}`}
             >
-              <span className="absolute top-0 inset-x-0 h-1/2 bg-gradient-to-b from-white/60 to-transparent rounded-t-full pointer-events-none"></span>
               <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>
                 play_circle
               </span>
@@ -253,6 +255,33 @@ export const HomeView: React.FC = () => {
             <span className="text-xs text-on-surface-variant text-center font-medium">
               {ctaConfig.helperText}
             </span>
+          </div>
+            </div>
+
+            <aside className="relative hidden min-h-[20rem] overflow-hidden rounded-[1.25rem] bg-[#edf4f1] border border-[#dce5e4] lg:block">
+              <img
+                src={LIBRARY_SCENE_IMAGE}
+                alt="책 더미가 놓인 작은 서재 장면"
+                className="absolute inset-0 h-full w-full object-cover object-center mix-blend-multiply opacity-75 transition-transform duration-500 hover:scale-105"
+                loading="lazy"
+              />
+              <div className="absolute inset-x-3 bottom-3 rounded-xl border border-white/80 bg-white/95 p-3 shadow-sm">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-primary">
+                    Today&apos;s shelf
+                  </span>
+                  <span className="material-symbols-outlined text-base text-secondary" aria-hidden="true">
+                    auto_stories
+                  </span>
+                </div>
+                <p className="mt-1 text-xs font-bold leading-relaxed text-on-surface">
+                  한 문장씩, 나만의 영어 서재를 채워요.
+                </p>
+                <p className="mt-1 text-[9px] text-on-surface-variant">
+                  3D asset: Polyfork · CC BY 4.0
+                </p>
+              </div>
+            </aside>
           </div>
         </section>
 
@@ -274,10 +303,10 @@ export const HomeView: React.FC = () => {
               }}
               role="button"
               tabIndex={0}
-              className="group relative rounded-2xl p-4 bg-surface-container-lowest/85 backdrop-blur-lg border border-white/60 shadow-xs hover:shadow-md active:scale-95 transition-all flex flex-col justify-between cursor-pointer"
+              className="group relative rounded-xl p-4 bg-white border border-[#dce5e4] hover:border-primary/50 hover:shadow-sm active:scale-95 transition-all flex flex-col justify-between cursor-pointer"
             >
               <div className="flex items-start justify-between">
-                <div className="w-10 h-10 rounded-2xl bg-error-container/80 flex items-center justify-center shadow-xs">
+                <div className="w-10 h-10 rounded-lg bg-[#f8e8e8] flex items-center justify-center">
                   <span className="material-symbols-outlined text-error text-[22px]">heart_broken</span>
                 </div>
                 <span className="px-2 py-0.5 rounded-full bg-error text-on-error text-[11px] font-bold shadow-xs">
@@ -297,10 +326,10 @@ export const HomeView: React.FC = () => {
               onClick={() => setActiveTab('review')}
               role="button"
               tabIndex={0}
-              className="group relative rounded-2xl p-4 bg-surface-container-lowest/85 backdrop-blur-lg border border-white/60 shadow-xs hover:shadow-md active:scale-95 transition-all flex flex-col justify-between cursor-pointer"
+              className="group relative rounded-xl p-4 bg-white border border-[#dce5e4] hover:border-primary/50 hover:shadow-sm active:scale-95 transition-all flex flex-col justify-between cursor-pointer"
             >
               <div className="flex items-start justify-between">
-                <div className="w-10 h-10 rounded-2xl bg-secondary-fixed/80 flex items-center justify-center shadow-xs">
+                <div className="w-10 h-10 rounded-lg bg-[#f5e8ef] flex items-center justify-center">
                   <span className="material-symbols-outlined text-secondary text-[22px]" style={{ fontVariationSettings: "'FILL' 1" }}>
                     bookmarks
                   </span>
@@ -322,10 +351,10 @@ export const HomeView: React.FC = () => {
               onClick={startRandomSpeedLesson}
               role="button"
               tabIndex={0}
-              className="group relative rounded-2xl p-4 bg-surface-container-lowest/85 backdrop-blur-lg border border-white/60 shadow-xs hover:shadow-md active:scale-95 transition-all flex flex-col justify-between cursor-pointer"
+              className="group relative rounded-xl p-4 bg-white border border-[#dce5e4] hover:border-primary/50 hover:shadow-sm active:scale-95 transition-all flex flex-col justify-between cursor-pointer"
             >
               <div className="flex items-start justify-between">
-                <div className="w-10 h-10 rounded-2xl bg-tertiary-container/60 flex items-center justify-center shadow-xs">
+                <div className="w-10 h-10 rounded-lg bg-[#f4efcf] flex items-center justify-center">
                   <span className="material-symbols-outlined text-tertiary text-[22px]">timer</span>
                 </div>
                 <span className="px-2 py-0.5 rounded-full bg-tertiary-fixed-dim text-on-tertiary-fixed text-[11px] font-bold">
@@ -345,10 +374,10 @@ export const HomeView: React.FC = () => {
               onClick={() => setActiveTab('explore')}
               role="button"
               tabIndex={0}
-              className="group relative rounded-2xl p-4 bg-surface-container-lowest/85 backdrop-blur-lg border border-white/60 shadow-xs hover:shadow-md active:scale-95 transition-all flex flex-col justify-between cursor-pointer"
+              className="group relative rounded-xl p-4 bg-white border border-[#dce5e4] hover:border-primary/50 hover:shadow-sm active:scale-95 transition-all flex flex-col justify-between cursor-pointer"
             >
               <div className="flex items-start justify-between">
-                <div className="w-10 h-10 rounded-2xl bg-primary-fixed/80 flex items-center justify-center shadow-xs">
+                <div className="w-10 h-10 rounded-lg bg-[#e5f3f0] flex items-center justify-center">
                   <span className="material-symbols-outlined text-primary text-[22px]">library_books</span>
                 </div>
                 <span className="px-2 py-0.5 rounded-full bg-primary text-on-primary text-[11px] font-bold">
@@ -366,7 +395,7 @@ export const HomeView: React.FC = () => {
         </section>
 
         {/* Section 5.1 #5 이번 주 학습 현황 (Weekly Attendance & Performance) */}
-        <section className="rounded-3xl p-6 bg-surface-container-lowest/90 backdrop-blur-xl border border-white/80 shadow-md space-y-4">
+        <section className="rounded-2xl p-6 bg-white border border-[#dce5e4] shadow-[0_8px_24px_rgba(32,55,58,0.05)] space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-full bg-secondary-container/40 flex items-center justify-center">
@@ -392,7 +421,7 @@ export const HomeView: React.FC = () => {
                 <div
                   className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
                     stat.isToday
-                      ? 'bg-gradient-to-tr from-secondary to-secondary-container text-on-secondary shadow-md ring-2 ring-secondary/30'
+                      ? 'bg-secondary text-on-secondary shadow-sm ring-2 ring-secondary/20'
                       : stat.isCompleted
                       ? 'bg-primary text-on-primary shadow-xs'
                       : 'bg-surface-container-high text-on-surface-variant'
@@ -456,10 +485,10 @@ export const HomeView: React.FC = () => {
 
             {/* Path Node 1: The Happy Prince (Active Current) */}
             <div className="relative flex items-start gap-4">
-              <div className="relative z-10 w-12 h-12 rounded-full bg-gradient-to-tr from-primary via-primary-container to-secondary flex items-center justify-center text-on-primary shadow-lg ring-4 ring-surface shadow-primary/30 shrink-0">
+              <div className="relative z-10 w-12 h-12 rounded-full bg-primary flex items-center justify-center text-on-primary shadow-sm ring-4 ring-surface shrink-0">
                 <span className="material-symbols-outlined text-2xl">menu_book</span>
               </div>
-              <div className="flex-1 rounded-2xl p-4 sm:p-5 bg-surface-container-lowest/90 backdrop-blur-xl border border-white/70 shadow-sm hover:shadow-md transition-all">
+              <div className="flex-1 rounded-xl p-4 sm:p-5 bg-white border border-[#dce5e4] shadow-sm hover:shadow-md transition-all">
                 <div className="flex items-center justify-between mb-1">
                   <span className="px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed text-xs font-bold">
                     초급 · 진행 중
@@ -488,7 +517,7 @@ export const HomeView: React.FC = () => {
               <div className="relative z-10 w-12 h-12 rounded-full bg-surface-container-highest flex items-center justify-center text-secondary shadow-sm ring-4 ring-surface shrink-0">
                 <span className="material-symbols-outlined text-2xl">lock_open</span>
               </div>
-              <div className="flex-1 rounded-2xl p-4 sm:p-5 bg-surface-container-lowest/80 backdrop-blur-xl border border-white/70 shadow-xs hover:shadow-md transition-all">
+              <div className="flex-1 rounded-xl p-4 sm:p-5 bg-white border border-[#dce5e4] shadow-sm hover:shadow-md transition-all">
                 <div className="flex items-center justify-between mb-1">
                   <span className="px-2 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed text-xs font-bold">
                     중급 · 도전 가능
@@ -527,7 +556,7 @@ export const HomeView: React.FC = () => {
               </div>
               <div
                 onClick={() => showToast('레벨 5 달성 시 오픈되는 고급 스테이지입니다. (현재 Lv.4)')}
-                className="flex-1 rounded-2xl p-4 sm:p-5 bg-surface-container-low/70 backdrop-blur-xs border border-white/40 cursor-pointer"
+                className="flex-1 rounded-xl p-4 sm:p-5 bg-[#f6f8f6] border border-[#e5ecea] cursor-pointer"
               >
                 <div className="flex items-center justify-between mb-1">
                   <span className="px-2 py-0.5 rounded-full bg-surface-container-highest text-on-surface-variant text-xs font-bold">
@@ -561,7 +590,7 @@ export const HomeView: React.FC = () => {
             {/* Media Card 1: 명작 문학관 */}
             <div
               onClick={() => setActiveTab('explore')}
-              className="rounded-2xl p-4 bg-gradient-to-r from-surface-container-lowest to-surface-container-low border border-white/60 shadow-xs flex items-center gap-4 cursor-pointer hover:shadow-md transition-shadow"
+              className="rounded-xl p-4 bg-white border border-[#dce5e4] shadow-sm flex items-center gap-4 cursor-pointer hover:shadow-md transition-shadow"
             >
               <div className="w-16 h-20 rounded-xl bg-primary-container/30 shrink-0 flex flex-col items-center justify-center text-primary shadow-inner">
                 <span className="material-symbols-outlined text-[28px]">local_library</span>
@@ -579,7 +608,7 @@ export const HomeView: React.FC = () => {
             </div>
 
             {/* Media Card 2: 영화 명대사관 */}
-            <div className="rounded-2xl p-4 bg-surface-container-lowest/90 backdrop-blur-xl border border-white/60 shadow-xs flex items-center gap-4 relative overflow-hidden">
+            <div className="rounded-xl p-4 bg-white border border-[#dce5e4] shadow-sm flex items-center gap-4 relative overflow-hidden">
               <div className="w-16 h-20 rounded-xl bg-secondary-fixed/50 shrink-0 flex flex-col items-center justify-center text-secondary shadow-inner">
                 <span className="material-symbols-outlined text-[28px]">theaters</span>
                 <span className="text-[10px] font-bold mt-1">CINEMA</span>
@@ -620,7 +649,7 @@ export const HomeView: React.FC = () => {
       {/* Desktop Right Auxiliary Sidebar (>=1200px) */}
       <aside className="w-full xl:w-[280px] shrink-0 flex flex-col gap-5">
         {/* Consecutive Streak Widget */}
-        <div className="p-5 rounded-2xl bg-surface-container-lowest/85 backdrop-blur-xl border border-white/70 shadow-xs flex flex-col gap-3">
+        <div className="p-5 rounded-xl bg-white border border-[#dce5e4] shadow-sm flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <span className="text-sm font-bold text-on-surface flex items-center gap-2">
               <span className="material-symbols-outlined text-secondary text-xl">local_fire_department</span>
@@ -652,7 +681,7 @@ export const HomeView: React.FC = () => {
         </div>
 
         {/* Weekly Goal */}
-        <div className="p-5 rounded-2xl bg-surface-container-lowest/85 backdrop-blur-xl border border-white/70 shadow-xs flex flex-col gap-3">
+        <div className="p-5 rounded-xl bg-white border border-[#dce5e4] shadow-sm flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <span className="text-sm font-bold text-on-surface flex items-center gap-2">
               <span className="material-symbols-outlined text-primary text-xl">flag</span>
@@ -661,7 +690,7 @@ export const HomeView: React.FC = () => {
             <span className="text-xs text-primary font-bold">70%</span>
           </div>
           <div className="w-full h-2 rounded-full bg-surface-container-high overflow-hidden">
-            <div className="h-full rounded-full bg-gradient-to-r from-primary-container via-secondary-container to-secondary w-[70%]"></div>
+            <div className="h-full rounded-full bg-primary w-[70%]"></div>
           </div>
           <div className="flex justify-between items-center text-on-surface-variant text-xs font-medium">
             <span>35 / 50 단어 완성</span>
@@ -670,7 +699,7 @@ export const HomeView: React.FC = () => {
         </div>
 
         {/* Review Queue Card */}
-        <div className="p-5 rounded-2xl bg-surface-container-lowest/85 backdrop-blur-xl border border-white/70 shadow-xs flex flex-col gap-3">
+        <div className="p-5 rounded-xl bg-white border border-[#dce5e4] shadow-sm flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <span className="text-sm font-bold text-on-surface flex items-center gap-2">
               <span className="material-symbols-outlined text-tertiary text-xl">schedule</span>
@@ -683,7 +712,7 @@ export const HomeView: React.FC = () => {
           <p className="text-xs text-on-surface-variant">에빙하우스 망각 곡선 주기에 도달한 복습 단어가 기다리고 있어요.</p>
           <button
             onClick={startReviewSession}
-            className="w-full py-2.5 px-4 rounded-full bg-gradient-to-r from-primary-container via-secondary-fixed to-secondary-container text-on-surface text-xs font-bold text-center shadow-xs hover:opacity-90 transition-opacity cursor-pointer"
+            className="w-full py-2.5 px-4 rounded-lg bg-primary text-on-primary text-xs font-bold text-center shadow-sm hover:bg-[#005b63] transition-colors cursor-pointer"
           >
             지금 바로 복습하기
           </button>
