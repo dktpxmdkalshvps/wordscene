@@ -1,3 +1,5 @@
+import { supabaseFetch } from './supabaseRest';
+
 export type PendingBookContent = {
   candidateId: string;
   workId: string;
@@ -32,20 +34,9 @@ type DbPendingMovieQuote = {
   notes: string | null;
 };
 
-const restGet = async <T,>(path: string): Promise<T> => {
-  const url = import.meta.env.VITE_SUPABASE_URL?.replace(/\/$/, '');
-  const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
-  if (!url || !key) throw new Error('Supabase environment is not configured');
-  const response = await fetch(`${url}/rest/v1/${path}`, {
-    headers: { apikey: key, Authorization: `Bearer ${key}` },
-  });
-  if (!response.ok) throw new Error(`Admin review request failed (${response.status})`);
-  return response.json() as Promise<T>;
-};
-
 export const fetchPendingBookContents = async (): Promise<PendingBookContent[]> => {
-  const rows = await restGet<DbPendingBookContent[]>(
-    'book_contents?select=candidate_id,work_id,segment_heading,original_text,translation_ko&review_status=eq.candidate&order=work_id.asc'
+  const rows = await supabaseFetch<DbPendingBookContent[]>(
+    'rest/v1/book_contents?select=candidate_id,work_id,segment_heading,original_text,translation_ko&review_status=eq.candidate&order=work_id.asc'
   );
   return rows.map(r => ({
     candidateId: r.candidate_id,
@@ -57,8 +48,8 @@ export const fetchPendingBookContents = async (): Promise<PendingBookContent[]> 
 };
 
 export const fetchPendingMovieQuotes = async (): Promise<PendingMovieQuote[]> => {
-  const rows = await restGet<DbPendingMovieQuote[]>(
-    'movie_quotes_ko_en?select=id,movie_title,quote_no,original_ko,translation_en,notes&review_status=eq.drafted&order=movie_title.asc,quote_no.asc'
+  const rows = await supabaseFetch<DbPendingMovieQuote[]>(
+    'rest/v1/movie_quotes_ko_en?select=id,movie_title,quote_no,original_ko,translation_en,notes&review_status=eq.drafted&order=movie_title.asc,quote_no.asc'
   );
   return rows.map(r => ({
     id: r.id,
@@ -94,12 +85,12 @@ const QUESTION_TYPE_BY_RANK: GeneratedQuestionType[] = ['fill_blank', 'word_orde
 // nothing after approval.
 export const fetchApprovedSentences = async (): Promise<ApprovedSentence[]> => {
   const [bookRows, works, movieRows] = await Promise.all([
-    restGet<{ candidate_id: string; work_id: string; original_text: string; translation_ko: string; selection_score: number }[]>(
-      'book_contents?select=candidate_id,work_id,original_text,translation_ko,selection_score&review_status=eq.selected&order=work_id.asc'
+    supabaseFetch<{ candidate_id: string; work_id: string; original_text: string; translation_ko: string; selection_score: number }[]>(
+      'rest/v1/book_contents?select=candidate_id,work_id,original_text,translation_ko,selection_score&review_status=eq.selected&order=work_id.asc'
     ),
-    restGet<{ id: string; title: string }[]>('works?select=id,title'),
-    restGet<{ id: number; movie_title: string; original_ko: string; translation_en: string; quote_no: string }[]>(
-      'movie_quotes_ko_en?select=id,movie_title,original_ko,translation_en,quote_no&review_status=eq.selected&order=movie_title.asc,quote_no.asc'
+    supabaseFetch<{ id: string; title: string }[]>('rest/v1/works?select=id,title'),
+    supabaseFetch<{ id: number; movie_title: string; original_ko: string; translation_en: string; quote_no: string }[]>(
+      'rest/v1/movie_quotes_ko_en?select=id,movie_title,original_ko,translation_en,quote_no&review_status=eq.selected&order=movie_title.asc,quote_no.asc'
     ),
   ]);
   const workTitleById = new Map(works.map(w => [w.id, w.title]));
@@ -175,8 +166,8 @@ type DbGeneratedQuestion = {
 };
 
 export const fetchPendingGeneratedQuestions = async (): Promise<PendingGeneratedQuestion[]> => {
-  const rows = await restGet<DbGeneratedQuestion[]>(
-    'generated_questions?select=id,source_table,source_id,question_type,work_title,author,prompt,prompt_korean,sentence,options,correct_answer,explanation&review_status=eq.drafted&order=created_at.desc'
+  const rows = await supabaseFetch<DbGeneratedQuestion[]>(
+    'rest/v1/generated_questions?select=id,source_table,source_id,question_type,work_title,author,prompt,prompt_korean,sentence,options,correct_answer,explanation&review_status=eq.drafted&order=created_at.desc'
   );
   return rows.map(r => ({
     id: r.id,
@@ -200,20 +191,10 @@ export const generateQuestion = async (
   sourceId: string,
   questionType: GeneratedQuestionType
 ): Promise<void> => {
-  const url = import.meta.env.VITE_SUPABASE_URL?.replace(/\/$/, '');
-  const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
-  if (!url || !key) throw new Error('Supabase environment is not configured');
-
-  const response = await fetch(`${url}/functions/v1/generate-question`, {
+  await supabaseFetch('functions/v1/generate-question', {
     method: 'POST',
-    headers: { apikey: key, Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ passcode, sourceTable, sourceId, questionType }),
   });
-  const data = await response.json().catch(() => null);
-  if (!response.ok) {
-    const detail = data?.validationNotes ? ` (${data.validationNotes})` : '';
-    throw new Error(`${data?.error || `Generation failed (${response.status})`}${detail}`);
-  }
 };
 
 export type ReviewTable = 'book_contents' | 'movie_quotes_ko_en' | 'generated_questions';
@@ -225,17 +206,8 @@ export const submitReview = async (
   id: string | number,
   action: ReviewAction
 ): Promise<void> => {
-  const url = import.meta.env.VITE_SUPABASE_URL?.replace(/\/$/, '');
-  const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
-  if (!url || !key) throw new Error('Supabase environment is not configured');
-
-  const response = await fetch(`${url}/functions/v1/admin-review`, {
+  await supabaseFetch('functions/v1/admin-review', {
     method: 'POST',
-    headers: { apikey: key, Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ passcode, table, id, action }),
   });
-  const data = await response.json().catch(() => null);
-  if (!response.ok) {
-    throw new Error(data?.error || `Review action failed (${response.status})`);
-  }
 };

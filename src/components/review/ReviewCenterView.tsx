@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { speakEnglishText } from '../../utils/speech';
+import { getDueDateLabel, getRepetitionStageInfo, isItemDueForReview } from '../../utils/srs';
 
 export const ReviewCenterView: React.FC = () => {
   const {
@@ -18,6 +19,7 @@ export const ReviewCenterView: React.FC = () => {
   const [playingId, setPlayingId] = useState<string | null>(null);
 
   const unmastered = reviewItems.filter(r => !r.mastered);
+  const dueItems = unmastered.filter(isItemDueForReview);
 
   // Filter works for saved sentences
   const workTitles = ['all', ...Array.from(new Set(savedSentences.map(s => s.workTitle)))];
@@ -39,7 +41,7 @@ export const ReviewCenterView: React.FC = () => {
           복습 센터
         </h1>
         <p className="text-sm text-on-surface-variant">
-          에빙하우스 망각 곡선에 기반한 취약 표현 복습과 나만의 문장 아카이브입니다.
+          에빙하우스 망각 곡선(SM-2) 기반 주기별 맞춤 복습과 나만의 문장 아카이브입니다.
         </p>
       </div>
 
@@ -53,11 +55,11 @@ export const ReviewCenterView: React.FC = () => {
               : 'text-on-surface-variant hover:text-on-surface'
           }`}
         >
-          <span className="material-symbols-outlined text-sm">heart_broken</span>
+          <span className="material-symbols-outlined text-sm">neurology</span>
           <span>오답 복습</span>
           {unmastered.length > 0 && (
             <span className="px-1.5 py-0.2 rounded-full bg-white/30 text-[10px]">
-              {unmastered.length}
+              {dueItems.length > 0 ? `${dueItems.length}개 오늘` : unmastered.length}
             </span>
           )}
         </button>
@@ -80,18 +82,18 @@ export const ReviewCenterView: React.FC = () => {
         </button>
       </div>
 
-      {/* TAB 1: 오답 복습 큐 (UI-006) */}
+      {/* TAB 1: 오답 복습 큐 (SM-2 에빙하우스) */}
       {activeSubTab === 'wrong' && (
         <div className="space-y-4">
           {/* Action Header Card */}
           <div className="p-5 rounded-3xl bg-gradient-to-r from-secondary-fixed/50 via-surface-container-low to-surface-container-lowest border border-white/80 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="space-y-1">
               <h3 className="text-base font-extrabold text-on-surface flex items-center gap-2">
-                <span className="material-symbols-outlined text-secondary text-xl">neurology</span>
-                오답 대기열 ({unmastered.length}개)
+                <span className="material-symbols-outlined text-secondary text-xl">update</span>
+                에빙하우스 주기 복습 ({dueItems.length > 0 ? `오늘 대상 ${dueItems.length}개 / 전체 ${unmastered.length}개` : `전체 ${unmastered.length}개`})
               </h3>
               <p className="text-xs text-on-surface-variant">
-                문제를 풀며 틀렸던 핵심 표현들을 다시 훈련하고 완벽히 내 것으로 만드세요.
+                1일 → 6일 → 15일 → 30일 간격으로 복습하여 단기 기억을 영구 장기 기억으로 전환합니다.
               </p>
             </div>
 
@@ -105,7 +107,7 @@ export const ReviewCenterView: React.FC = () => {
               }`}
             >
               <span className="material-symbols-outlined text-base">play_arrow</span>
-              <span>오답 집중 퀴즈 시작</span>
+              <span>{dueItems.length > 0 ? '오늘 복습 퀴즈 시작' : '오답 전체 복습 시작'}</span>
             </button>
           </div>
 
@@ -113,7 +115,7 @@ export const ReviewCenterView: React.FC = () => {
           {unmastered.length === 0 ? (
             <div className="py-16 text-center rounded-3xl bg-surface-container-lowest border border-white/80 space-y-3">
               <span className="material-symbols-outlined text-5xl text-primary">verified</span>
-              <h4 className="text-base font-bold text-on-surface">현재 오답이 모두 해결되었습니다!</h4>
+              <h4 className="text-base font-bold text-on-surface">현재 복습할 오답이 모두 해결되었습니다!</h4>
               <p className="text-xs text-on-surface-variant">
                 새로운 원서 문장을 탐색하거나 랜덤 스피드 퀴즈로 감각을 유지하세요.
               </p>
@@ -126,50 +128,70 @@ export const ReviewCenterView: React.FC = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {unmastered.map(item => (
-                <div
-                  key={item.id}
-                  className="rounded-3xl p-5 bg-surface-container-lowest border border-white/80 shadow-xs hover:shadow-md transition-all flex flex-col justify-between gap-3"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="px-2.5 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant text-[11px] font-semibold">
-                      {item.workTitle}
-                    </span>
-                    <span className="px-2 py-0.5 rounded-full bg-error-container text-error text-[11px] font-bold">
-                      {item.wrongCount}회 오답 ({item.lastMissedAt})
-                    </span>
-                  </div>
+              {unmastered.map(item => {
+                const stageInfo = getRepetitionStageInfo(item);
+                const dueText = getDueDateLabel(item.nextReviewAt);
+                const isDue = isItemDueForReview(item);
 
-                  <div className="space-y-1.5">
-                    <div className="flex items-start justify-between gap-2">
-                      <p className="text-sm sm:text-base font-semibold text-on-surface">
-                        {item.english}
-                      </p>
+                return (
+                  <div
+                    key={item.id}
+                    className={`rounded-3xl p-5 bg-surface-container-lowest border shadow-xs hover:shadow-md transition-all flex flex-col justify-between gap-3 ${
+                      isDue ? 'border-secondary/40 ring-1 ring-secondary/20' : 'border-white/80'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between flex-wrap gap-1.5">
+                      <div className="flex items-center gap-1.5">
+                        <span className="px-2.5 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant text-[11px] font-semibold">
+                          {item.workTitle}
+                        </span>
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${stageInfo.colorClass}`}>
+                          {stageInfo.label}
+                        </span>
+                      </div>
+                      <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
+                        isDue ? 'bg-error-container text-error' : 'bg-surface-container-high text-on-surface-variant'
+                      }`}>
+                        {dueText}
+                      </span>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="text-sm sm:text-base font-semibold text-on-surface">
+                          {item.english}
+                        </p>
+                        <button
+                          onClick={() => handlePlayTTS(item.id, item.english)}
+                          className="p-1.5 rounded-full text-on-surface-variant hover:text-primary transition-colors shrink-0"
+                          title="발음 듣기"
+                        >
+                          <span className="material-symbols-outlined text-lg">volume_up</span>
+                        </button>
+                      </div>
+                      <p className="text-xs text-on-surface-variant">{item.korean}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="inline-block px-2 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed text-[11px] font-bold">
+                          핵심어: {item.highlightWord}
+                        </span>
+                        <span className="text-[11px] text-on-surface-variant/80">
+                          (EF: {item.easinessFactor ?? 2.5})
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-surface-container-high flex justify-end">
                       <button
-                        onClick={() => handlePlayTTS(item.id, item.english)}
-                        className="p-1.5 rounded-full text-on-surface-variant hover:text-primary transition-colors shrink-0"
-                        title="발음 듣기"
+                        onClick={() => markReviewMastered(item.id)}
+                        className="px-3.5 py-1.5 rounded-full bg-surface-container-low text-primary hover:bg-primary-container text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer"
                       >
-                        <span className="material-symbols-outlined text-lg">volume_up</span>
+                        <span className="material-symbols-outlined text-sm">check</span>
+                        <span>숙련 완료 처리 (+15 XP)</span>
                       </button>
                     </div>
-                    <p className="text-xs text-on-surface-variant">{item.korean}</p>
-                    <span className="inline-block px-2 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed text-[11px] font-bold mt-1">
-                      핵심어: {item.highlightWord}
-                    </span>
                   </div>
-
-                  <div className="pt-2 border-t border-surface-container-high flex justify-end">
-                    <button
-                      onClick={() => markReviewMastered(item.id)}
-                      className="px-3.5 py-1.5 rounded-full bg-surface-container-low text-primary hover:bg-primary-container text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer"
-                    >
-                      <span className="material-symbols-outlined text-sm">check</span>
-                      <span>숙련 완료 처리 (+15 XP)</span>
-                    </button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

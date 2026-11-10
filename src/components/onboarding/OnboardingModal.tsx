@@ -30,7 +30,7 @@ const featureDetails: Record<string, { label: string; items: string[] }> = {
 };
 
 export const OnboardingModal: React.FC = () => {
-  const { showOnboarding, setShowOnboarding, setActiveTab, showToast, updateUserProfile, works } = useApp();
+  const { showOnboarding, setShowOnboarding, setActiveTab, showToast, updateUserProfile } = useApp();
   const [onboardingPage, setOnboardingPage] = useState<'landing' | 'goal'>('landing');
   const [goal, setGoal] = useState('시험 & 스펙 완성');
   const [level, setLevel] = useState('초급 (A2)');
@@ -69,7 +69,7 @@ export const OnboardingModal: React.FC = () => {
           <div className="ws-goal-canvas">
             <section className="ws-lumi-stage">
               <div className="ws-lumi-stage__head"><span>✨ 3D 시각 몰입 학습</span><b>● Lumi와 함께 탐험</b></div>
-              <div className="ws-lumi-image"><img src="https://i.imgur.com/R7w7qhM.png" alt="루미 공식 마스코트" /><div><span className="material-symbols-outlined">menu_book</span><p><b>반짝이는 나의 영어 여정</b><small>생생한 장면 속에서 피어나는 언어 감각</small></p></div></div>
+              <div className="ws-lumi-image"><img src="/wordscene-entry.png" alt="루미 공식 마스코트" /><div><span className="material-symbols-outlined">menu_book</span><p><b>반짝이는 나의 영어 여정</b><small>생생한 장면 속에서 피어나는 언어 감각</small></p></div></div>
               <div className="ws-lumi-stats"><p><b>111개</b><span>엄선된 원서·영화 명문장</span></p><p><b>14편</b><span>고전 원서 + 영화</span></p><p><b>10분</b><span>권장 일일 학습</span></p></div>
             </section>
             <section className="ws-goal-panel">
@@ -123,7 +123,7 @@ export const OnboardingModal: React.FC = () => {
 
           <div className="ws-product-card" aria-label="WordScene 학습 화면 미리보기">
             <div className="ws-product-card__bar"><div><i /><i /><i /></div><span>✨ Today · 5 min</span></div>
-            <div className="ws-product-card__visual"><img src="https://i.imgur.com/R7w7qhM.png" alt="루미와 반짝이는 WordScene 학습 화면" /><span>📖 공개 판본 원문 그대로 학습</span></div>
+            <div className="ws-product-card__visual"><img src="/wordscene-entry.png" alt="루미와 반짝이는 WordScene 학습 화면" /><span>📖 공개 판본 원문 그대로 학습</span></div>
             <div className="ws-product-steps">
               <div><b>🎯</b><span><strong>Step 1 · 관심 분야 선택하기</strong><small>행복한 왕자 · 셜록 홈즈의 모험</small></span><i>✓</i></div>
               <div className="active"><b>🧠</b><span><strong>Step 2 · 1분 실력 진단</strong><small className="ws-mini-progress"><i /></small></span><i>진행중</i></div>
@@ -158,27 +158,7 @@ export const OnboardingModal: React.FC = () => {
         <section id="library" className="ws-library-section">
           <div className="ws-library-heading"><div><span>CURATED MASTERPIECES</span><h2>지금 만날 수 있는 원서</h2></div><button type="button" onClick={() => enterApp('explore', '명작 도서관을 둘러보세요.')}>명작 도서관 전체보기 →</button></div>
           <div className="ws-book-grid">
-            {books.map(([title, ko, author, color], index) => {
-              const matchedWork = works.find(w =>
-                w.title.toLowerCase().includes(title.toLowerCase()) ||
-                w.koreanTitle.includes(ko) ||
-                w.id.toLowerCase().includes(title.toLowerCase().split(' ')[0])
-              );
-              const sentenceCount = matchedWork ? matchedWork.totalSentences : 10;
-
-              return (
-                <article className={`ws-book ws-book--${color}`} key={title}>
-                  <div className="ws-book__cover">
-                    <span>COLLECTION 0{index + 1}</span>
-                    <strong>{title}</strong>
-                    <i>WordScene Classics</i>
-                  </div>
-                  <h3>{ko}</h3>
-                  <p>{title} · {author}</p>
-                  <small>★ 학습 문장 {sentenceCount}개</small>
-                </article>
-              );
-            })}
+            {books.map(([title, ko, author, color], index) => <article className={`ws-book ws-book--${color}`} key={title}><div className="ws-book__cover"><span>COLLECTION 0{index + 1}</span><strong>{title}</strong><i>WordScene Classics</i></div><h3>{ko}</h3><p>{title} · {author}</p><small>★ 학습 문장 3개</small></article>)}
           </div>
         </section>
 

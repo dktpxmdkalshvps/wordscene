@@ -23,6 +23,7 @@ import {
 import { loadContentCatalog, localCatalog } from '../lib/contentService';
 import { getDeviceId } from '../lib/deviceId';
 import { deleteProgress, loadProgress, syncProgress, RemoteProgress } from '../lib/progressService';
+import { calculateSM2, isItemDueForReview } from '../utils/srs';
 
 interface AppContextType {
   user: UserProfile;
@@ -37,8 +38,6 @@ interface AppContextType {
   weeklyStats: WeeklyStat[];
   activeTab: string;
   setActiveTab: (tab: string) => void;
-  exploreCategory: string;
-  setExploreCategory: (category: string) => void;
   selectedWorkDetail: Work | null;
   setSelectedWorkDetail: (work: Work | null) => void;
   toastMessage: string | null;
@@ -66,7 +65,7 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 const FRESH_PROFILE: UserProfile = {
-  name: '은별',
+  name: '학습자',
   level: 1,
   levelTitle: 'Lv.1 첫 문장',
   totalXp: 0,
@@ -118,7 +117,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
   const [weeklyStats, setWeeklyStats] = useState<WeeklyStat[]>(freshWeeklyStats);
   const [activeTab, setActiveTab] = useState<string>('home');
-  const [exploreCategory, setExploreCategory] = useState<string>('all');
   const [selectedWorkDetail, setSelectedWorkDetail] = useState<Work | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [showOnboarding, setShowOnboarding] = useState<boolean>(() => (
@@ -247,17 +245,56 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const startReviewSession = () => {
-    if (reviewItems.length === 0) {
+    const unmastered = reviewItems.filter(r => !r.mastered);
+    if (unmastered.length === 0) {
       showToast('복습할 오답 항목이 없습니다! 랜덤 문장을 추천해요.');
       startRandomSpeedLesson();
       return;
     }
-    // Form questions from review items
-    const reviewQuestions = HAPPY_PRINCE_QUESTIONS.slice(0, 3);
+
+    const dueItems = unmastered.filter(isItemDueForReview);
+    const targetItems = dueItems.length > 0 ? dueItems : unmastered;
+
+    const reviewQuestions: Question[] = targetItems.map(item => {
+      const distractors = unmastered
+        .filter(other => other.id !== item.id && other.korean !== item.korean)
+        .map(other => other.korean)
+        .slice(0, 3);
+      
+      const defaultDistractors = [
+        '문맥과 전혀 일치하지 않는 번역입니다.',
+        '다른 상황에서 쓰이는 관용적 표현입니다.',
+        '의미가 잘못 정반대로 해석된 번역입니다.'
+      ];
+      
+      const options = [item.korean];
+      for (const d of [...distractors, ...defaultDistractors]) {
+        if (options.length >= 4) break;
+        if (!options.includes(d)) options.push(d);
+      }
+
+      const shuffledOptions = [...options].sort((a, b) => (a.charCodeAt(0) % 3) - (b.charCodeAt(0) % 3));
+
+      return {
+        id: item.questionId || `rev-q-${item.id}`,
+        sentenceId: item.sentenceId || item.id,
+        type: 'translation_match',
+        prompt: '원문과 가장 잘 맞는 한국어 번역을 고르세요 (SM-2 에빙하우스 복습).',
+        promptKorean: item.english,
+        sentence: item.english,
+        options: shuffledOptions,
+        correctAnswer: item.korean,
+        explanation: `에빙하우스 망각곡선 주기 복습입니다. (원문: "${item.english}")`,
+        workTitle: item.workTitle,
+        author: '에빙하우스 복습 센터',
+        vocabularies: [],
+      };
+    });
+
     setActiveSession({
       sessionId: `review-${Date.now()}`,
       workId: 'review-queue',
-      workTitle: '오답 집중 복습',
+      workTitle: dueItems.length > 0 ? '에빙하우스 주기 복습' : '오답 반복 훈련',
       questions: reviewQuestions,
       currentIndex: 0,
       answers: [],
@@ -272,24 +309,43 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const currentQuestion = activeSession.questions[activeSession.currentIndex];
 
-    // If answer is incorrect, automatically queue for review
-    if (!isCorrect && currentQuestion) {
-      const exists = reviewItems.some(r => r.questionId === currentQuestion.id);
-      if (!exists) {
-        const newRev: ReviewItem = {
-          id: `rev-${Date.now()}`,
-          questionId: currentQuestion.id,
-          sentenceId: currentQuestion.sentenceId,
-          workTitle: currentQuestion.workTitle,
-          english: currentQuestion.sentence,
-          korean: currentQuestion.promptKorean || '문장 번역',
-          wrongCount: 1,
-          lastMissedAt: '방금 전',
-          mastered: false,
-          highlightWord: currentQuestion.vocabularies?.[0]?.word || 'keyword'
-        };
-        setReviewItems(prev => [newRev, ...prev]);
-      }
+    if (currentQuestion) {
+      setReviewItems(prev => {
+        const existingIndex = prev.findIndex(
+          r => r.questionId === currentQuestion.id || r.sentenceId === currentQuestion.sentenceId
+        );
+
+        if (existingIndex >= 0) {
+          const existing = prev[existingIndex];
+          const quality = isCorrect ? 4 : 1;
+          const srs = calculateSM2(existing, quality);
+          const updated: ReviewItem = {
+            ...existing,
+            ...srs,
+            wrongCount: isCorrect ? existing.wrongCount : existing.wrongCount + 1,
+            lastMissedAt: isCorrect ? existing.lastMissedAt : '방금 전',
+          };
+          const next = [...prev];
+          next[existingIndex] = updated;
+          return next;
+        } else if (!isCorrect) {
+          const srs = calculateSM2({}, 1);
+          const newRev: ReviewItem = {
+            id: `rev-${Date.now()}`,
+            questionId: currentQuestion.id,
+            sentenceId: currentQuestion.sentenceId,
+            workTitle: currentQuestion.workTitle,
+            english: currentQuestion.sentence,
+            korean: currentQuestion.promptKorean || '문장 번역',
+            wrongCount: 1,
+            lastMissedAt: '방금 전',
+            highlightWord: currentQuestion.vocabularies?.[0]?.word || 'keyword',
+            ...srs,
+          };
+          return [newRev, ...prev];
+        }
+        return prev;
+      });
     }
 
     setActiveSession(prev => {
@@ -433,8 +489,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         weeklyStats,
         activeTab,
         setActiveTab,
-        exploreCategory,
-        setExploreCategory,
         selectedWorkDetail,
         setSelectedWorkDetail,
         toastMessage,

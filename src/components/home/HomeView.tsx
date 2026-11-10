@@ -18,13 +18,9 @@ export const HomeView: React.FC = () => {
     startRandomSpeedLesson,
     startReviewSession,
     setActiveTab,
-    setExploreCategory,
     showToast,
     setSelectedWorkDetail
   } = useApp();
-
-  const bookCount = works.filter(w => w.category === 'books').length || 5;
-  const cinemaCount = works.filter(w => w.category === 'cinema').length || 9;
 
   const [cinemaAlerted, setCinemaAlerted] = useState(false);
   const [musicAlerted, setMusicAlerted] = useState(false);
@@ -487,7 +483,7 @@ export const HomeView: React.FC = () => {
               </div>
             </div>
 
-            {/* Path Node 2: Pride and Prejudice (Ready Challenge) */}
+            {/* Path Node 2: Alice in Wonderland (Ready Challenge) */}
             <div className="relative flex items-start gap-4">
               <div className="relative z-10 w-12 h-12 rounded-full bg-surface-container-highest flex items-center justify-center text-secondary shadow-sm ring-4 ring-surface shrink-0">
                 <span className="material-symbols-outlined text-2xl">lock_open</span>
@@ -509,8 +505,8 @@ export const HomeView: React.FC = () => {
                     </span>
                   </div>
                 </div>
-                <h4 className="text-base font-bold text-on-surface">Pride and Prejudice</h4>
-                <p className="text-xs text-on-surface-variant mt-0.5">오만과 편견 명대사 및 문장 학습</p>
+                <h4 className="text-base font-bold text-on-surface">Alice in Wonderland</h4>
+                <p className="text-xs text-on-surface-variant mt-0.5">신비한 원더랜드 대화문 마스터</p>
                 <button
                   onClick={() => {
                     const sherlock = works.find(w => /sherlock/i.test(w.title)) ?? works[1];
@@ -554,23 +550,17 @@ export const HomeView: React.FC = () => {
               <h3 className="text-base sm:text-lg font-bold text-on-surface">미디어 확장 컬렉션</h3>
             </div>
             <button
-              onClick={() => {
-                setExploreCategory('all');
-                setActiveTab('explore');
-              }}
+              onClick={() => setActiveTab('explore')}
               className="text-xs text-primary font-bold hover:underline cursor-pointer"
             >
               더보기
             </button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {/* Media Card 1: 영미 고전 오디오북 원서 */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Media Card 1: 명작 문학관 */}
             <div
-              onClick={() => {
-                setExploreCategory('books');
-                setActiveTab('explore');
-              }}
+              onClick={() => setActiveTab('explore')}
               className="rounded-2xl p-4 bg-gradient-to-r from-surface-container-lowest to-surface-container-low border border-white/60 shadow-xs flex items-center gap-4 cursor-pointer hover:shadow-md transition-shadow"
             >
               <div className="w-16 h-20 rounded-xl bg-primary-container/30 shrink-0 flex flex-col items-center justify-center text-primary shadow-inner">
@@ -579,7 +569,7 @@ export const HomeView: React.FC = () => {
               </div>
               <div className="flex-1 min-w-0">
                 <span className="px-2 py-0.5 rounded-full bg-primary text-on-primary text-[11px] font-bold">
-                  {bookCount}권 학습 가능
+                  24권 학습 가능
                 </span>
                 <h4 className="text-sm font-bold text-on-surface mt-1 truncate">영미 고전 오디오북 원서</h4>
                 <p className="text-xs text-on-surface-variant line-clamp-1 mt-0.5">
@@ -588,71 +578,40 @@ export const HomeView: React.FC = () => {
               </div>
             </div>
 
-            {/* Media Card 2: 한국 영화 명대사 (서비스 중) */}
-            <div
-              onClick={() => {
-                setExploreCategory('cinema');
-                setActiveTab('explore');
-              }}
-              className="rounded-2xl p-4 bg-gradient-to-r from-surface-container-lowest to-surface-container-low border border-white/60 shadow-xs flex items-center gap-3 cursor-pointer hover:shadow-md transition-shadow"
-            >
-              <div className="w-14 h-20 rounded-xl bg-secondary-fixed/50 shrink-0 flex flex-col items-center justify-center text-secondary shadow-inner">
+            {/* Media Card 2: 영화 명대사관 */}
+            <div className="rounded-2xl p-4 bg-surface-container-lowest/90 backdrop-blur-xl border border-white/60 shadow-xs flex items-center gap-4 relative overflow-hidden">
+              <div className="w-16 h-20 rounded-xl bg-secondary-fixed/50 shrink-0 flex flex-col items-center justify-center text-secondary shadow-inner">
                 <span className="material-symbols-outlined text-[28px]">theaters</span>
                 <span className="text-[10px] font-bold mt-1">CINEMA</span>
               </div>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className="px-2 py-0.5 rounded-full bg-secondary text-on-secondary text-[11px] font-bold whitespace-nowrap">
-                    서비스 중
+                <div className="flex items-center gap-2">
+                  <span className="px-2 py-0.5 rounded-full bg-secondary text-on-secondary text-[11px] font-bold">
+                    준비 중
                   </span>
-                  <span className="text-[11px] text-secondary font-bold whitespace-nowrap">{cinemaCount}편 라이브</span>
+                  <span className="text-[11px] text-secondary font-bold">12월 공개</span>
                 </div>
-                <h4 className="text-sm font-bold text-on-surface mt-1 truncate">한국 영화 명대사</h4>
+                <h4 className="text-sm font-bold text-on-surface mt-1 truncate">헐리우드 영화 명대사</h4>
                 <p className="text-xs text-on-surface-variant line-clamp-1 mt-0.5">
-                  {cinemaCount}편의 명작 한국 영화 대사 회화
+                  생생한 구어체 표현과 위트 있는 표현집
                 </p>
               </div>
-            </div>
-
-            {/* Media Card 3: 헐리우드 영화 명대사 (서브 컬렉션 - 12월 공개 예정) */}
-            <div className="rounded-2xl p-4 bg-surface-container-lowest/90 backdrop-blur-xl border border-white/60 shadow-xs flex flex-col justify-between gap-3 relative overflow-hidden">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="w-14 h-20 rounded-xl bg-surface-container-high shrink-0 flex flex-col items-center justify-center text-on-surface-variant shadow-inner">
-                  <span className="material-symbols-outlined text-[28px]">movie</span>
-                  <span className="text-[10px] font-bold mt-1">HOLLYWOOD</span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="px-2 py-0.5 rounded-full bg-surface-container-highest text-on-surface-variant text-[11px] font-bold whitespace-nowrap">
-                      준비 중
-                    </span>
-                    <span className="text-[11px] text-primary font-bold whitespace-nowrap">12월 공개 예정</span>
-                  </div>
-                  <h4 className="text-sm font-bold text-on-surface mt-1 truncate">헐리우드 영화 명대사</h4>
-                  <p className="text-xs text-on-surface-variant line-clamp-1 mt-0.5">
-                    현지 위트와 생생한 구어체 표현집
-                  </p>
-                </div>
-              </div>
-              <div className="flex justify-end pt-1 border-t border-surface-container-high/50">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setCinemaAlerted(!cinemaAlerted);
-                    showToast(cinemaAlerted ? '알림 예약을 취소했습니다.' : '헐리우드 영화 명대사 오픈 알림이 예약되었습니다! 🔔');
-                  }}
-                  className={`min-h-[32px] px-3 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 transition-all shrink-0 cursor-pointer ${
-                    cinemaAlerted
-                      ? 'bg-secondary text-on-secondary shadow-xs'
-                      : 'bg-surface-container-high text-on-surface hover:bg-secondary-fixed'
-                  }`}
-                >
-                  <span className="material-symbols-outlined text-xs">
-                    {cinemaAlerted ? 'check' : 'notifications'}
-                  </span>
-                  <span className="whitespace-nowrap">{cinemaAlerted ? '예약됨' : '알림 받기'}</span>
-                </button>
-              </div>
+              <button
+                onClick={() => {
+                  setCinemaAlerted(!cinemaAlerted);
+                  showToast(cinemaAlerted ? '알림 예약을 취소했습니다.' : '영화 명대사 오픈 알림이 예약되었습니다! 🔔');
+                }}
+                className={`min-h-[40px] px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1 transition-all shrink-0 cursor-pointer ${
+                  cinemaAlerted
+                    ? 'bg-secondary text-on-secondary shadow-xs'
+                    : 'bg-surface-container-high text-on-surface hover:bg-secondary-fixed'
+                }`}
+              >
+                <span className="material-symbols-outlined text-sm">
+                  {cinemaAlerted ? 'check' : 'notifications'}
+                </span>
+                <span>{cinemaAlerted ? '예약됨' : '알림 받기'}</span>
+              </button>
             </div>
           </div>
         </section>

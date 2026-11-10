@@ -1,5 +1,6 @@
 import type { Difficulty, Question, Work } from '../types';
 import { INITIAL_WORKS, HAPPY_PRINCE_QUESTIONS } from '../data/mockData';
+import { supabaseFetch } from './supabaseRest';
 
 type DbWork = { id: string; title: string; author: string; sort_order: number };
 type DbContent = {
@@ -261,17 +262,6 @@ const buildMovieWorks = (
   return { works, questionsByWork };
 };
 
-const request = async <T,>(path: string): Promise<T> => {
-  const url = import.meta.env.VITE_SUPABASE_URL?.replace(/\/$/, '');
-  const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
-  if (!url || !key) throw new Error('Supabase environment is not configured');
-  const response = await fetch(`${url}/rest/v1/${path}`, {
-    headers: { apikey: key, Authorization: `Bearer ${key}` },
-  });
-  if (!response.ok) throw new Error(`Content request failed (${response.status})`);
-  return response.json() as Promise<T>;
-};
-
 export const localCatalog = (): ContentCatalog => ({
   works: INITIAL_WORKS,
   questionsByWork: Object.fromEntries(INITIAL_WORKS.map(work => [work.id, HAPPY_PRINCE_QUESTIONS])),
@@ -281,8 +271,8 @@ export const localCatalog = (): ContentCatalog => ({
 export const loadContentCatalog = async (): Promise<ContentCatalog> => {
   try {
     const [dbWorks, contents] = await Promise.all([
-      request<DbWork[]>('works?select=id,title,author,sort_order&order=sort_order.asc'),
-      request<DbContent[]>('book_contents?select=candidate_id,work_id,segment_heading,original_text,translation_ko,difficulty,learning_focus,selection_score&review_status=eq.selected&order=work_id.asc,no_in_work.asc'),
+      supabaseFetch<DbWork[]>('rest/v1/works?select=id,title,author,sort_order&order=sort_order.asc'),
+      supabaseFetch<DbContent[]>('rest/v1/book_contents?select=candidate_id,work_id,segment_heading,original_text,translation_ko,difficulty,learning_focus,selection_score&review_status=eq.selected&order=work_id.asc,no_in_work.asc'),
     ]);
     if (!dbWorks.length || !contents.length) return localCatalog();
 
@@ -310,11 +300,9 @@ export const loadContentCatalog = async (): Promise<ContentCatalog> => {
       dbWorks.map(work => [work.id, createQuestions(work, contents.filter(card => card.work_id === work.id))])
     );
 
-    // Movie quotes are additive and independently resilient — a failure here
-    // must not take down the (already working) book catalog above.
     try {
-      const movieQuotes = await request<DbMovieQuote[]>(
-        'movie_quotes_ko_en?select=id,movie_title,quote_no,original_ko,translation_en,notes&review_status=eq.selected&order=movie_title.asc,quote_no.asc'
+      const movieQuotes = await supabaseFetch<DbMovieQuote[]>(
+        'rest/v1/movie_quotes_ko_en?select=id,movie_title,quote_no,original_ko,translation_en,notes&review_status=eq.selected&order=movie_title.asc,quote_no.asc'
       );
       if (movieQuotes.length) {
         const movieCatalog = buildMovieWorks(movieQuotes, works.length, fallbackCovers);
@@ -325,13 +313,9 @@ export const loadContentCatalog = async (): Promise<ContentCatalog> => {
       // movies unavailable — books-only catalog is still returned below
     }
 
-    // Admin-approved AI-generated questions are an optional quality upgrade
-    // over the deterministic ones above. A failure here must not affect the
-    // (already working) catalog — every entry just keeps its deterministic
-    // question, exactly the fallback behavior this feature is designed around.
     try {
-      const generated = await request<DbGeneratedQuestion[]>(
-        'generated_questions?select=source_table,source_id,question_type,prompt,prompt_korean,sentence,options,correct_answer,explanation&review_status=eq.selected'
+      const generated = await supabaseFetch<DbGeneratedQuestion[]>(
+        'rest/v1/generated_questions?select=source_table,source_id,question_type,prompt,prompt_korean,sentence,options,correct_answer,explanation&review_status=eq.selected'
       );
       if (generated.length) {
         const bySentenceIdAndType = new Map<string, DbGeneratedQuestion>();

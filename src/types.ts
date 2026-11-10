@@ -74,6 +74,12 @@ export interface ReviewItem {
   lastMissedAt: string;
   mastered: boolean;
   highlightWord: string;
+  // SM-2 Spaced Repetition Fields
+  interval?: number;
+  repetition?: number;
+  easinessFactor?: number;
+  nextReviewAt?: string;
+  lastReviewedAt?: string;
 }
 
 export interface SavedSentence {

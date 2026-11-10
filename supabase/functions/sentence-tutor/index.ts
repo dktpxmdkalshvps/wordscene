@@ -95,7 +95,16 @@ Deno.serve(async (req: Request) => {
             parts: [{ text: buildSystemInstruction(workTitle, author, englishSentence, koreanTranslation) }],
           },
           contents,
-          generationConfig: { temperature: 0.4, maxOutputTokens: 512 },
+          // thinkingBudget: 0 disables gemini-3.6-flash's internal reasoning
+          // tokens for this task (a short conversational explanation doesn't
+          // need chain-of-thought) - without it, thinking tokens were eating
+          // most of maxOutputTokens and truncating the visible reply after
+          // a sentence or two. maxOutputTokens is also raised as a margin.
+          generationConfig: {
+            temperature: 0.4,
+            maxOutputTokens: 1024,
+            thinkingConfig: { thinkingBudget: 0 },
+          },
         }),
       }
     );
@@ -106,10 +115,17 @@ Deno.serve(async (req: Request) => {
     }
 
     const data = await geminiResponse.json();
-    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    const parts = data?.candidates?.[0]?.content?.parts;
+    // Gemini can split a single answer across multiple parts - concatenating
+    // only parts[0] silently truncated replies mid-sentence.
+    const reply = Array.isArray(parts) ? parts.map((p: any) => p?.text ?? '').join('') : undefined;
     if (!reply) {
       console.error('Gemini API returned no candidates', JSON.stringify(data));
       return jsonResponse({ error: 'AI 응답 생성에 실패했습니다.' }, 502);
+    }
+    const finishReason = data?.candidates?.[0]?.finishReason;
+    if (finishReason === 'MAX_TOKENS') {
+      console.warn('sentence-tutor reply hit maxOutputTokens and may be truncated');
     }
 
     return jsonResponse({ reply });
