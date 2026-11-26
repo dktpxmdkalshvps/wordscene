@@ -2,9 +2,7 @@ import { Page } from '@playwright/test';
 
 export const dismissOnboarding = async (page: Page) => {
   const cta = page.getByRole('button', { name: '무료로 시작하기', exact: true });
-  if (await cta.isVisible().catch(() => false)) {
-    await cta.click();
-  }
+  await cta.click();
 };
 
 // Blocking every Supabase host makes local-fallback content deterministic

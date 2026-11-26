@@ -119,9 +119,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [activeTab, setActiveTab] = useState<string>('home');
   const [selectedWorkDetail, setSelectedWorkDetail] = useState<Work | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const [showOnboarding, setShowOnboarding] = useState<boolean>(() => (
-    localStorage.getItem('ws_onboarding_complete') !== 'true'
-  ));
+  // Every visit starts at the landing page, including returning learners.
+  const [showOnboarding, setShowOnboarding] = useState<boolean>(true);
 
   const [deviceId] = useState<string>(() => getDeviceId());
   const [hasHydratedRemote, setHasHydratedRemote] = useState(false);

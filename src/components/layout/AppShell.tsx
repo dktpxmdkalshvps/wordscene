@@ -14,7 +14,11 @@ import { HistoryView } from '../history/HistoryView';
 import { ProfileView } from '../profile/ProfileView';
 
 export const AppShell: React.FC = () => {
-  const { activeSession, lastResult, activeTab } = useApp();
+  const { activeSession, lastResult, activeTab, showOnboarding } = useApp();
+
+  if (showOnboarding) {
+    return <OnboardingModal />;
+  }
 
   // If in an active learning session, hide global navigation and display session
   if (activeSession) {
@@ -65,8 +69,6 @@ export const AppShell: React.FC = () => {
       {/* Floating Ambient Toast */}
       <Toast />
 
-      {/* Onboarding Welcome Modal */}
-      <OnboardingModal />
     </div>
   );
 };
