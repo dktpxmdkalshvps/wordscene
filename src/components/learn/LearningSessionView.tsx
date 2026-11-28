@@ -243,6 +243,7 @@ export const LearningSessionView: React.FC = () => {
                   <button
                     key={option}
                     disabled={isAnswerChecked}
+                    data-testid="answer-option"
                     onClick={() => setSelectedAnswer(option)}
                     className={`p-4 rounded-2xl border text-sm font-semibold transition-all cursor-pointer text-center ${btnStyle}`}
                   >
@@ -289,6 +290,7 @@ export const LearningSessionView: React.FC = () => {
                     <button
                       key={idx}
                       disabled={isUsed || isAnswerChecked}
+                      data-testid="word-option"
                       onClick={() => handlePickWord(word, idx)}
                       className={`px-3.5 py-2 rounded-full text-xs font-bold transition-all shadow-xs ${
                         isUsed
@@ -337,6 +339,7 @@ export const LearningSessionView: React.FC = () => {
                   <button
                     key={idx}
                     disabled={isAnswerChecked}
+                    data-testid="answer-option"
                     onClick={() => setSelectedAnswer(option)}
                     className={`w-full p-4 rounded-2xl border text-left text-xs sm:text-sm font-semibold transition-all flex items-start gap-3 cursor-pointer ${itemStyle}`}
                   >
@@ -373,6 +376,7 @@ export const LearningSessionView: React.FC = () => {
                   <button
                     key={option}
                     disabled={isAnswerChecked}
+                    data-testid="answer-option"
                     onClick={() => setSelectedAnswer(option)}
                     className={`p-4 rounded-2xl border text-sm font-semibold transition-all text-left flex items-center gap-3 cursor-pointer ${cardStyle}`}
                   >
