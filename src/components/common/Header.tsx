@@ -16,7 +16,7 @@ export const Header: React.FC = () => {
             role="button"
             tabIndex={0}
           >
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary-container via-secondary-container to-tertiary-container flex items-center justify-center shadow-[0_2px_8px_rgba(103,232,249,0.5)]">
+            <div className="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center shadow-none">
               <span className="material-symbols-outlined text-on-surface text-[18px]">auto_awesome</span>
             </div>
             <span className="hidden min-[400px]:inline font-extrabold text-[17px] text-on-surface tracking-tight">WordScene</span>

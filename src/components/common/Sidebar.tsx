@@ -22,7 +22,7 @@ export const Sidebar: React.FC = () => {
           className="flex items-center gap-3 px-2 cursor-pointer"
           onClick={() => setActiveTab('home')}
         >
-          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-primary-container via-secondary-fixed to-tertiary-container flex items-center justify-center shadow-[0_4px_12px_rgba(103,232,249,0.45)]">
+          <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center shadow-none">
             <span className="material-symbols-outlined text-primary text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>
               auto_awesome
             </span>
@@ -47,7 +47,7 @@ export const Sidebar: React.FC = () => {
                 onClick={() => setActiveTab(item.id)}
                 className={`flex items-center justify-between px-4 py-3 rounded-full transition-all cursor-pointer group ${
                   isActive
-                    ? 'bg-gradient-to-r from-primary-container/70 to-secondary-fixed/70 text-on-surface font-bold shadow-[0_4px_16px_-2px_rgba(103,232,249,0.3)]'
+                    ? 'bg-gradient-to-r from-primary-container/70 to-secondary-fixed/70 text-on-surface font-bold shadow-none'
                     : 'text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface'
                 }`}
               >
@@ -75,7 +75,7 @@ export const Sidebar: React.FC = () => {
 
       {/* Bottom Profile Summary Card */}
       <div className="flex flex-col gap-2">
-        <div className="p-3.5 rounded-2xl bg-surface-container-low/80 backdrop-blur-md border border-white/60 shadow-[0_4px_16px_-2px_rgba(244,114,182,0.1)] flex items-center justify-between">
+        <div className="p-3.5 rounded-2xl bg-surface-container-low/80 backdrop-blur-md border border-white/60 shadow-none flex items-center justify-between">
           <div
             className="flex items-center gap-3 cursor-pointer"
             onClick={() => setActiveTab('profile')}
