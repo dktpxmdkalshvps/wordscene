@@ -9,3 +9,6 @@ Acceptance: onboarding always first; CTA and exploration work; lessons still com
 Validation: typecheck, build, offline fallback, full lesson and landing entry tests plus responsive garden/reduced motion regression checks. Do not run live content-pipeline test.
 
 Results: TypeScript typecheck and Vite production build passed using the installed locked dependencies. pnpm 11 installed lockfile dependencies but reported ignored esbuild install scripts; direct TypeScript/Vite checks succeeded. Playwright discovered the new tests; browser execution is blocked by Chromium CDN HTTP 403 and no installed browser binary. Run the Verify workflow before merging. Asset is generated original Lumi sticker, optimized WebP (~39 KB).
+
+## Mascot correction
+Replaced the reading mascot with the approved reference board’s flat sticker proportions: tiny integrated ears, low simple dot eyes, no mouth, pale cream/lavender shading and a simple silver backpack. Shared Lumi component updates onboarding and home consistently. Preserved transparency and corrected intrinsic dimensions to the optimized asset.
